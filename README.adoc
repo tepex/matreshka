@@ -1,0 +1,128 @@
+= Матрешка
+Tepex <tepex@mail.ru>
+1.0, 15/V-2026
+:source-highliter: rouge
+
+Обертка для стороннего приложения ДБО. iOS KMP приложение для инкапсуляции ДБО.
+
+== Для Gradle (Android Studio)
+[source,shell]
+----
+mkdir -p build/xcode-frameworks
+----
+
+== Для Xcode
+1. Create a new Xcode project -> iOS -> App
+2. Параметры
+   - Product Name: iosApp
+   - Organization Identifier: com.habitloop.app
+   - Interface: Storyboard
+   - Language: Swift
+3. Script Phase -> New Run Script Phase
+
+[source,shell]
+----
+cd "$SRCROOT/.."
+
+# Очищаем зависшие фоновые процессы
+./gradlew --stop
+
+# Вызываем официальный таск сборки JetBrains. 
+# Xcode автоматически передаст внутрь Gradle переменные $ARCHS и $CONFIGURATION,
+# благодаря чему таски ресурсов :syncComposeResourcesForIos отработают без ошибок!
+./gradlew :Matreshka:embedAndSignAppleFrameworkForXcode :Dbo:embedAndSignAppleFrameworkForXcode
+ script or drag a script file from your workspace to insert its path.
+----
+3.1. Опции:
+- Based on dependency analysis: off
+- Show environment variables in build log: on
+- Run script: For install builds only: off
+
+Обязательно перетащить Run Script выше этапа Compile Sources
+
+4. Linker
+Build Settings -> All, Combined -> Other Linker Flags
+[source,text]
+----
+-framework Matreshka
+-framework Dbo
+----
+
+5. SceneDelegate.swift
+[source,swift]
+----
+import UIKit
+import Matreshka
+import Dbo
+
+// ХАК ДЛЯ ОБХОДА ТРЕБОВАНИЙ COMPOSE MULTIPLATFORM НА XCODE 14:
+@objc(UITextLoupeSession)
+class UITextLoupeSessionDummy: NSObject {}
+
+class SceneDelegate: UIResponder, UIWindowSceneDelegate {
+    var window: UIWindow?
+    
+    func scene(
+        _ scene: UIScene,
+        willConnectTo session: UISceneSession,
+        options connectionOptions: UIScene.ConnectionOptions
+    ) {
+        // 1. Проверяем и инициализируем окно приложения
+        guard let windowScene = (scene as? UIWindowScene) else { return }
+        let window = UIWindow(windowScene: windowScene)
+        
+        // 2. Создаем системный контейнер табов (Bottom Navigation)
+        let tabBarController = UITabBarController()
+        
+        // 3. Вызываем Compose Multiplatform экран из модуля Matreshka
+        let matreshkaVC = MatreshkaMainKt.MatreshkaViewController()
+        matreshkaVC.tabBarItem = UITabBarItem(title: "Matreshka", image: nil, tag: 0)
+        
+        // 4. Вызываем Compose Multiplatform экран из модуля DBO
+        let dboVC = DboMainKt.DboViewController()
+        dboVC.tabBarItem = UITabBarItem(title: "DBO", image: nil, tag: 1)
+        
+        // 5. Помещаем оба экрана в табы
+        tabBarController.viewControllers = [matreshkaVC, dboVC]
+        
+        // 6. Делаем таб-бар корневым и отображаем окно
+        window.rootViewController = tabBarController
+        self.window = window
+        window.makeKeyAndVisible()
+    }
+}
+----
+
+6. Путь к фреймворкам в Xcode
+Build Settings -> All, Combined -> Framework Search Paths
+[source,text]
+----
+$(SRCROOT)/../build/xcode-frameworks
+----
+
+[source,shell]
+----
+# Сборка бинарников под Intel-симулятор Xcode 14.2
+./gradlew :Matreshka:linkDebugFrameworkIosX64 :Dbo:linkDebugFrameworkIosX64
+
+# Синхронизация ресурсов Compose Multiplatform
+./gradlew :Matreshka:syncComposeResourcesForIos :Dbo:syncComposeResourcesForIos
+
+# Создаем папку, куда Xcode будет ходить за файлами
+mkdir -p build/xcode-frameworks
+cp -R Matreshka/build/bin/iosX64/debugFramework/Matreshka.framework build/xcode-frameworks/
+cp -R Dbo/build/bin/iosX64/debugFramework/Dbo.framework build/xcode-frameworks/
+----
+
+Очистка после выравнивания версии material3 и composeMultiplatform:
+[source,shell]
+----
+./gradlew clean
+./gradlew --stop
+# Удаляем локальные кэши сборки конкретно для Kotlin targets
+rm -rf .gradle/configuration-cache/
+rm -rf build/
+----
+
+Gradle Sync
+

@@ -1,4 +1,6 @@
-rootProject.name = "habitloop-kmp-exp"
+@file:Suppress("UnstableApiUsage")
+
+rootProject.name = "habitloop"
 enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 
 pluginManagement {

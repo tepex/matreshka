@@ -11,6 +11,21 @@ Tepex <tepex@mail.ru>
 mkdir -p build/xcode-frameworks
 ----
 
+=== Фикс бага import androidx.compose.foundation.layout.
+kotlin version = 2.1.0
+Добавить в `gradle.properties` 2 флага:
+[source,properties]
+----
+compose.kotlin.native.manageCacheKind=false
+kotlin.apple.generateXcodeProperties=false
+----
+Компиляция:
+[source,shell]
+----
+./gradlew :Dbo:compileKotlinIosX64
+./gradlew :Matreshka:compileKotlinIosX64
+----
+
 == Для Xcode
 1. Create a new Xcode project -> iOS -> App
 2. Параметры

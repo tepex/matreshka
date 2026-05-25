@@ -31,7 +31,6 @@ cd "$SRCROOT/.."
 # Xcode автоматически передаст внутрь Gradle переменные $ARCHS и $CONFIGURATION,
 # благодаря чему таски ресурсов :syncComposeResourcesForIos отработают без ошибок!
 ./gradlew :Matreshka:embedAndSignAppleFrameworkForXcode :Dbo:embedAndSignAppleFrameworkForXcode
- script or drag a script file from your workspace to insert its path.
 ----
 3.1. Опции:
 - Based on dependency analysis: off

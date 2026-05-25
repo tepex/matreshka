@@ -1,9 +1,15 @@
 = Матрешка
 Tepex <tepex@mail.ru>
 1.0, 15/V-2026
-:source-highliter: rouge- 
+:source-highliter: rouge
 
-Обертка для стороннего приложения ДБО. iOS KMP приложение для инкапсуляции ДБО. 
+Обертка для стороннего приложения ДБО. iOS KMP приложение для инкапсуляции ДБО.
+
+== Для Gradle (Android Studio)
+[source,shell]
+----
+mkdir -p build/xcode-frameworks
+----
 
 == Для Xcode
 1. Create a new Xcode project -> iOS -> App

@@ -1,7 +1,4 @@
-@file:OptIn(KotlinNativeCacheApi::class)
-
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
-import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeCacheApi
 
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
@@ -19,11 +16,6 @@ kotlin {
         iosTarget.binaries.framework {
             baseName = "Dbo"
             isStatic = false // Динамический фреймворк
-
-            disableNativeCache(
-                version = org.jetbrains.kotlin.gradle.plugin.mpp.DisableCacheInKotlinVersion.`2_3_21`,
-                reason = "Fixing Kotlin compiler lowering crash in material3 AppBar.kt"
-            )
         }
     }
 

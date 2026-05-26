@@ -1,6 +1,7 @@
 package com.habitloop.app.matreshka
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -33,7 +34,8 @@ data class HabitItem(
 
 @Composable
 fun HabitDayScreen(
-    onAddHabitClick: () -> Unit = {}
+    onAddHabitClick: () -> Unit = {},
+    onHabitClick: (Int) -> Unit = {}
 ) {
     // Палитра цветов по макету Figma
     val bgLightBlue = Color(0xFFF4F7FA)
@@ -169,7 +171,13 @@ fun HabitDayScreen(
                 modifier = Modifier.fillMaxWidth()
             ) {
                 items(habits) { habit ->
-                    HabitCard(habit = habit)
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { onHabitClick(habit.id) }
+                    ) {
+                        HabitCard(habit = habit)
+                    }
                 }
             }
         }

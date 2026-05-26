@@ -1,21 +1,65 @@
 package com.habitloop.app.matreshka
 
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
+import androidx.compose.runtime.*
+import kotlinx.coroutines.delay
+import org.jetbrains.compose.ui.tooling.preview.Preview
+
+enum class AppScreen {
+    SPLASH, WELCOME1, WELCOME2, WELCOME3, LOGIN
+}
 
 @Composable
 fun App() {
-    MaterialTheme {
-        Box(
-            modifier = Modifier.fillMaxSize(),
-            contentAlignment = Alignment.Center
-        ) {
-            Text("Привет из модуля Matreshka на Compose Multiplatform!")
+    var currentScreen by remember { mutableStateOf(AppScreen.SPLASH) }
+
+    if (currentScreen == AppScreen.SPLASH) {
+        LaunchedEffect(Unit) {
+            delay(3000)
+            currentScreen = AppScreen.WELCOME1
         }
     }
+
+    AppContent(
+        currentScreen = currentScreen,
+        onScreenChange = { nextScreen -> currentScreen = nextScreen }
+    )
+}
+
+@Composable
+fun AppContent(
+    currentScreen: AppScreen,
+    onScreenChange: (AppScreen) -> Unit
+) {
+    MaterialTheme {
+        when (currentScreen) {
+            AppScreen.SPLASH -> SplashScreen()
+
+            AppScreen.WELCOME1 -> Welcome1Screen(
+                onNext = { onScreenChange(AppScreen.WELCOME2) },
+                onSkip = { onScreenChange(AppScreen.LOGIN) }
+            )
+
+            AppScreen.WELCOME2 -> Welcome2Screen(
+                onNext = { onScreenChange(AppScreen.WELCOME3) },
+                onSkip = { onScreenChange(AppScreen.LOGIN) }
+            )
+
+            AppScreen.WELCOME3 -> Welcome3Screen(
+                onNext = { onScreenChange(AppScreen.LOGIN) },
+                onSkip = { onScreenChange(AppScreen.LOGIN) }
+            )
+
+            AppScreen.LOGIN -> LoginScreen()
+        }
+    }
+}
+
+@Preview
+@Composable
+fun AppPreview() {
+    AppContent(
+        currentScreen = AppScreen.WELCOME1,
+        onScreenChange = {}
+    )
 }

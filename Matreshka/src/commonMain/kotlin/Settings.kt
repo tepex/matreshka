@@ -37,8 +37,8 @@ fun SettingsScreen(
 
     // Состояния полей и диалогов
     var nameText by remember { mutableStateOf("Алина") }
-    var showLogoutDialog by remember { mutableStateOf(false) }
-    var showDeleteDialog by remember { mutableStateOf(true) }
+    var showLogoutDialog by remember { mutableStateOf(true) }
+    var showDeleteDialog by remember { mutableStateOf(false) }
 
     Scaffold(
         containerColor = bgLightBlue,

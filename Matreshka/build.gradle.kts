@@ -16,6 +16,13 @@ kotlin {
         iosTarget.binaries.framework {
             baseName = "Matreshka"
             isStatic = false
+            /* Костыль! Говорим линкеру считать этот конкретный класс динамическим/необязательным.
+            Передает линкеру команду unresolved, разрешая символу _OBJC_CLASS_$_UITextLoupeSession оставаться неопределенным
+            во время компиляции фреймворка. Без этого при сборке iOS-приложения может возникать ошибка
+            "Undefined symbols for architecture x86_64: _OBJC_CLASS_$_UITextLoupeSession" из-за того, что этот класс
+            используется внутри UIKit, но не всегда включается в финальный бинарник. */
+            linkerOpts("-Wl,-U,_OBJC_CLASS_\$_UITextLoupeSession")
+            binaryOptions["bundleId"] = "com.habitloop.app.matreshka"
         }
     }
     

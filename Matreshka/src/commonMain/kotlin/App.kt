@@ -6,7 +6,7 @@ import kotlinx.coroutines.delay
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
 enum class AppScreen {
-    SPLASH, WELCOME1, WELCOME2, WELCOME3, LOGIN, HABIT_DAY, NEW_HABIT, HABIT_DETAILS, STATISTICS
+    SPLASH, WELCOME1, WELCOME2, WELCOME3, LOGIN, HABIT_DAY, NEW_HABIT, HABIT_DETAILS, STATISTICS, SETTINGS
 }
 
 @Composable
@@ -70,6 +70,10 @@ fun AppContent(
 
             AppScreen.STATISTICS -> StatisticsScreen(
                 onTabClick = { tabScreen -> onScreenChange(tabScreen) }
+            )
+            AppScreen.SETTINGS -> SettingsScreen(
+                onTabClick = { tabScreen -> onScreenChange(tabScreen) },
+                onLogoutSuccess = { onScreenChange(AppScreen.LOGIN) } // Перенаправляет на чистый ввод телефона при логауте/удалении
             )
         }
     }

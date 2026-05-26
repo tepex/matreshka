@@ -92,7 +92,7 @@ fun HabitDayScreen(
                 )
                 NavigationBarItem(
                     selected = false,
-                    onClick = { /* экран настроек */ },
+                    onClick = { onTabClick(AppScreen.SETTINGS) },
                     icon = { Icon(Icons.Default.Settings, contentDescription = null) },
                     label = { Text("НАСТРОЙКИ", fontSize = 10.sp) },
                     colors = NavigationBarItemDefaults.colors(unselectedIconColor = textGray, unselectedTextColor = textGray)

@@ -87,7 +87,7 @@ fun StatisticsScreen(
                 )
                 NavigationBarItem(
                     selected = false,
-                    onClick = { /* ??? */ },
+                    onClick = { onTabClick(AppScreen.SETTINGS) },
                     icon = { Icon(Icons.Default.Settings, contentDescription = null) },
                     label = { Text("НАСТРОЙКИ", fontSize = 10.sp) },
                     colors = NavigationBarItemDefaults.colors(unselectedIconColor = textGray, unselectedTextColor = textGray)

@@ -21,7 +21,9 @@ enum class AuthStep {
 }
 
 @Composable
-fun LoginScreen() {
+fun LoginScreen(
+    onSuccess: () -> Unit = {}
+) {
     var currentStep by remember { mutableStateOf(AuthStep.ENTER_PHONE) }
     var phoneNumber by remember { mutableStateOf("") }
     var smsCode by remember { mutableStateOf("") }
@@ -160,7 +162,7 @@ fun LoginScreen() {
                     Spacer(modifier = Modifier.height(32.dp))
 
                     Button(
-                        onClick = { /* Логика авторизации */ },
+                        onClick = { onSuccess() },
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(54.dp),

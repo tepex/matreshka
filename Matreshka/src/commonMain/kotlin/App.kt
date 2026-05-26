@@ -6,7 +6,7 @@ import kotlinx.coroutines.delay
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
 enum class AppScreen {
-    SPLASH, WELCOME1, WELCOME2, WELCOME3, LOGIN
+    SPLASH, WELCOME1, WELCOME2, WELCOME3, LOGIN, HABIT_DAY
 }
 
 @Composable
@@ -50,7 +50,19 @@ fun AppContent(
                 onSkip = { onScreenChange(AppScreen.LOGIN) }
             )
 
-            AppScreen.LOGIN -> LoginScreen()
+            AppScreen.LOGIN -> LoginScreen(
+                onSuccess = { onScreenChange(AppScreen.HABIT_DAY) }
+            )
+            AppScreen.HABIT_DAY -> HabitDayScreen()
+
+            /*
+            AppScreen.HABIT_DAY -> HabitDayScreen(
+                onAddHabitClick = { currentScreen = AppScreen.NEW_HABIT }
+            )
+            AppScreen.NEW_HABIT -> NewHabitScreen(
+                onBackClick = { currentScreen = AppScreen.HABIT_DAY }
+            )
+            */
         }
     }
 }

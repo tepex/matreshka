@@ -35,7 +35,8 @@ data class HabitItem(
 @Composable
 fun HabitDayScreen(
     onAddHabitClick: () -> Unit = {},
-    onHabitClick: (Int) -> Unit = {}
+    onHabitClick: (Int) -> Unit = {},
+    onTabClick: (AppScreen) -> Unit = {}
 ) {
     // Палитра цветов по макету Figma
     val bgLightBlue = Color(0xFFF4F7FA)
@@ -73,7 +74,7 @@ fun HabitDayScreen(
             ) {
                 NavigationBarItem(
                     selected = true,
-                    onClick = {},
+                    onClick = { onTabClick(AppScreen.HABIT_DAY) },
                     icon = { Icon(Icons.Default.CalendarToday, contentDescription = null) },
                     label = { Text("СЕГОДНЯ", fontSize = 10.sp, fontWeight = FontWeight.Bold) },
                     colors = NavigationBarItemDefaults.colors(
@@ -84,14 +85,14 @@ fun HabitDayScreen(
                 )
                 NavigationBarItem(
                     selected = false,
-                    onClick = {},
+                    onClick = { onTabClick(AppScreen.STATISTICS) },
                     icon = { Icon(Icons.Default.BarChart, contentDescription = null) },
                     label = { Text("СТАТИСТИКА", fontSize = 10.sp) },
                     colors = NavigationBarItemDefaults.colors(unselectedIconColor = textGray, unselectedTextColor = textGray)
                 )
                 NavigationBarItem(
                     selected = false,
-                    onClick = {},
+                    onClick = { /* экран настроек */ },
                     icon = { Icon(Icons.Default.Settings, contentDescription = null) },
                     label = { Text("НАСТРОЙКИ", fontSize = 10.sp) },
                     colors = NavigationBarItemDefaults.colors(unselectedIconColor = textGray, unselectedTextColor = textGray)

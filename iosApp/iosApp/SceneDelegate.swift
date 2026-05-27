@@ -17,6 +17,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         // 1. Проверяем и инициализируем окно приложения
         guard let windowScene = (scene as? UIWindowScene) else { return }
         let window = UIWindow(windowScene: windowScene)
+        window.frame = UIScreen.main.bounds
         
         // 2. Создаем системный контейнер табов (Bottom Navigation)
         let tabBarController = UITabBarController()

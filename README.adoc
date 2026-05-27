@@ -117,6 +117,7 @@ $(SRCROOT)/../build/xcode-frameworks
 [source,shell]
 ----
 # Сборка бинарников под Intel-симулятор Xcode 14.2
+# Нужно предварительно запустить в терминале для проверки
 ./gradlew :Matreshka:linkDebugFrameworkIosX64 :Dbo:linkDebugFrameworkIosX64
 
 # Синхронизация ресурсов Compose Multiplatform

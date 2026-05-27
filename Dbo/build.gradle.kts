@@ -16,6 +16,8 @@ kotlin {
         iosTarget.binaries.framework {
             baseName = "Dbo"
             isStatic = false // Динамический фреймворк
+            linkerOpts("-Wl,-U,_OBJC_CLASS_\$_UITextLoupeSession")
+            binaryOptions["bundleId"] = "com.habitloop.app.dbo"
         }
     }
 

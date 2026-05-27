@@ -141,3 +141,30 @@ rm -rf build/
 
 Gradle Sync
 
+=== Перед запуском сборки в Xcode (ветка ui-4-xcode)
+1. ./gradlew :Matreshka:linkDebugFrameworkIosX64 :Dbo:linkDebugFrameworkIosX64
+2. Очистка кэшей и папки сборки Cmd + Shift + K
+3. Для Gradle:
++
+[source,shell]
+----
+./gradlew clean
+rm -rf ~/Library/Developer/Xcode/DerivedData/*
+----
+
+4. Проверка Build Settings
+- Framework Search Paths: $(BUILT_PRODUCTS_DIR) (в режиме recursive).
+- User Script Sandboxing: No
+5. Build Phases Run Script:
++
+[source,shell]
+----
+cd "$SRCROOT/.."
+export ENABLE_USER_SCRIPT_SANDBOXING=NO
+./gradlew :Matreshka:embedAndSignAppleFrameworkForXcode
+./gradlew :Dbo:embedAndSignAppleFrameworkForXcode
+----
+
+6. General -> Frameworks, Libraries, and Embedded Content: пусто
+
+

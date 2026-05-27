@@ -12,14 +12,7 @@ kotlin {
         iosX64(),
         iosArm64(),
         iosSimulatorArm64()
-    ).forEach { iosTarget ->
-        iosTarget.binaries.framework {
-            baseName = "Dbo"
-            isStatic = false // Динамический фреймворк
-            linkerOpts("-Wl,-U,_OBJC_CLASS_\$_UITextLoupeSession")
-            binaryOptions["bundleId"] = "com.habitloop.app.dbo"
-        }
-    }
+    )
 
     android {
         namespace = "com.habitloop.app.dbo"

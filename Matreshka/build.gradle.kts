@@ -23,6 +23,8 @@ kotlin {
             используется внутри UIKit, но не всегда включается в финальный бинарник. */
             linkerOpts("-Wl,-U,_OBJC_CLASS_\$_UITextLoupeSession")
             binaryOptions["bundleId"] = "com.habitloop.app.matreshka"
+            // !!! Вшиваем статический код Dbo внутрь Matreshka
+            export(project(":Dbo"))
         }
     }
     
@@ -52,6 +54,9 @@ kotlin {
             implementation(compose.materialIconsExtended)
 
             implementation(compose.components.uiToolingPreview)
+
+            // Подключаем Dbo через api (вместо implementation), чтобы его классы были видны наружу в Swift
+            api(project(":Dbo"))
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)

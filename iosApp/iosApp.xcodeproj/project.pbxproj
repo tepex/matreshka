@@ -271,7 +271,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "cd \"$SRCROOT/..\"\nexport ENABLE_USER_SCRIPT_SANDBOXING=NO\n\necho \"Building Single Dynamic Framework (Matreshka + Static Dbo)...\"\n./gradlew :Matreshka:embedAndSignAppleFrameworkForXcode\n";
+			shellScript = "cd \"$SRCROOT/..\"\nexport ENABLE_USER_SCRIPT_SANDBOXING=NO\n\necho \"Building Single Dynamic Framework (Habit + Static Opt)...\"\n./gradlew :Habit:embedAndSignAppleFrameworkForXcode\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 
@@ -474,7 +474,7 @@
 				MARKETING_VERSION = 1.0;
 				OTHER_LDFLAGS = (
 					"-framework",
-					Matreshka,
+					Habit,
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.habitloop.app.iosApp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -506,7 +506,7 @@
 				MARKETING_VERSION = 1.0;
 				OTHER_LDFLAGS = (
 					"-framework",
-					Matreshka,
+					Habit,
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.habitloop.app.iosApp;
 				PRODUCT_NAME = "$(TARGET_NAME)";

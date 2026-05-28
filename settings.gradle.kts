@@ -32,5 +32,5 @@ dependencyResolutionManagement {
     }
 }
 
-include(":Dbo")
-include(":Matreshka")
+include(":Opt")
+include(":Habit")

@@ -5,12 +5,6 @@ Tepex <tepex@mail.ru>
 
 Обертка для стороннего приложения ДБО. iOS KMP приложение для инкапсуляции ДБО.
 
-== Для Gradle (Android Studio)
-[source,shell]
-----
-mkdir -p build/xcode-frameworks
-----
-
 === Фикс бага import androidx.compose.foundation.layout.
 kotlin version = 2.1.0
 Добавить в `gradle.properties` 2 флага:
@@ -22,8 +16,8 @@ kotlin.apple.generateXcodeProperties=false
 Компиляция:
 [source,shell]
 ----
-./gradlew :Dbo:compileKotlinIosX64
-./gradlew :Matreshka:compileKotlinIosX64
+./gradlew :Opt:compileKotlinIosX64
+./gradlew :Habit:compileKotlinIosX64
 ----
 
 == Для Xcode
@@ -38,14 +32,7 @@ kotlin.apple.generateXcodeProperties=false
 [source,shell]
 ----
 cd "$SRCROOT/.."
-
-# Очищаем зависшие фоновые процессы
-./gradlew --stop
-
-# Вызываем официальный таск сборки JetBrains. 
-# Xcode автоматически передаст внутрь Gradle переменные $ARCHS и $CONFIGURATION,
-# благодаря чему таски ресурсов :syncComposeResourcesForIos отработают без ошибок!
-./gradlew :Matreshka:embedAndSignAppleFrameworkForXcode :Dbo:embedAndSignAppleFrameworkForXcode
+#TDOD: добавить актуальный скрипт
 ----
 3.1. Опции:
 - Based on dependency analysis: off
@@ -53,14 +40,6 @@ cd "$SRCROOT/.."
 - Run script: For install builds only: off
 
 Обязательно перетащить Run Script выше этапа Compile Sources
-
-4. Linker
-Build Settings -> All, Combined -> Other Linker Flags
-[source,text]
-----
--framework Matreshka
--framework Dbo
-----
 
 5. SceneDelegate.swift
 [source,swift]

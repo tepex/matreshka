@@ -23,7 +23,9 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         let tabBarController = UITabBarController()
         
         // 3. Вызываем Compose Multiplatform экран из модуля Matreshka
-        let matreshkaVC = MatreshkaMainKt.MatreshkaViewController()
+        let matreshkaVC = MatreshkaMainKt.MatreshkaViewController {
+            
+        }
         matreshkaVC.tabBarItem = UITabBarItem(title: "Matreshka", image: nil, tag: 0)
         
         // 4. Вызываем Compose Multiplatform экран из модуля DBO
@@ -34,7 +36,25 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         tabBarController.viewControllers = [matreshkaVC, dboVC]
         
         // 6. Делаем таб-бар корневым и отображаем окно
-        window.rootViewController = tabBarController
+        //window.rootViewController = tabBarController
+        
+        // Проверяем реальное сохранение на устройстве через Kotlin
+        if MatreshkaMainKt.isUserLoggedIn() {
+            print("Пользователь уже авторизован. Открываем табы.")
+            window.rootViewController = tabBarController
+        } else {
+            print("Пользователь не авторизован. Показываем Login.")
+            
+            // Создаем LoginViewController и передаем логику переключения на табы при успехе
+            let loginVC = MatreshkaMainKt.MatreshkaViewController() {
+                DispatchQueue.main.async {
+                    window.rootViewController = tabBarController
+                }
+            }
+            window.rootViewController = loginVC
+        }
+        
+        
         self.window = window
         window.makeKeyAndVisible()
     }

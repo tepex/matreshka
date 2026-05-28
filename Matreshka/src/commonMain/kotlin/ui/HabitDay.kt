@@ -1,4 +1,4 @@
-package com.habitloop.app.matreshka
+package com.habitloop.app.matreshka.ui
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable

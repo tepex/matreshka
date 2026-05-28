@@ -19,16 +19,20 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.russhwolf.settings.Settings
+import com.russhwolf.settings.set
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
 enum class AuthStep {
-    ENTER_PHONE, ENTER_CODE
+    ENTER_PHONE, ENTER_CODE, HABIT_DAY
 }
 
 @Composable
 fun LoginScreen(
     onSuccess: () -> Unit = {}
 ) {
+    val settings = remember { Settings() }
+
     var currentStep by remember { mutableStateOf(AuthStep.ENTER_PHONE) }
     var email by remember { mutableStateOf("") }
     var verificationCode by remember { mutableStateOf("") }
@@ -150,12 +154,18 @@ fun LoginScreen(
                     Button(
                         onClick = {
                             val cleanEmail = email.trim().lowercase()
-                            if (savedEmails.contains(cleanEmail)) {
-                                // Email найден -> сразу пускаем дальше в приложение
+                            val savedEmail = settings.getString("saved_email", "")
+
+                            println("[Matreshka]: savedEmail: $savedEmail")
+
+                            if (cleanEmail.isNotEmpty() && cleanEmail == savedEmail) {
+                                settings["is_logged_in"] = true
+
                                 focusManager.clearFocus()
-                                onSuccess()
+                                //onSuccess()
+                                currentStep = AuthStep.HABIT_DAY
                             } else {
-                                // Email НЕ найден -> спрашиваем код
+                                // Email НЕ совпал с сохраненным (или пустой) -> идем запрашивать код "0000"
                                 isEmailError = false
                                 currentStep = AuthStep.ENTER_CODE
                             }
@@ -249,8 +259,10 @@ fun LoginScreen(
                             // @TODO: Хардкодинг. Валидация кода
                             if (verificationCode == "0000") {
                                 isCodeError = false
+                                settings["is_logged_in"] = true
+                                settings["saved_email"] = email.trim().lowercase()
                                 focusManager.clearFocus()
-                                onSuccess()
+                                currentStep = AuthStep.HABIT_DAY
                             } else {
                                 isCodeError = true
                             }
@@ -271,6 +283,9 @@ fun LoginScreen(
                         color = Color.Gray,
                         textAlign = TextAlign.Center
                     )
+                }
+                AuthStep.HABIT_DAY -> {
+                    HabitDayScreen()
                 }
             }
         }

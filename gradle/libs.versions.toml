@@ -13,6 +13,7 @@ androidx-testExt = "1.1.5"
 # Стек для стабильной сборки iosX64 под Intel Mac:
 #composeMultiplatform = "1.11.0"
 composeMultiplatform = "1.6.11"
+multiplatformSettings = "1.1.1"
 agp = "9.1.1"
 kotlin = "2.1.0"
 #kotlin = "1.9.23"
@@ -37,6 +38,7 @@ compose-foundation = { module = "org.jetbrains.compose.foundation:foundation", v
 compose-material3 = { module = "org.jetbrains.compose.material3:material3", version.ref = "material3" }
 compose-ui = { module = "org.jetbrains.compose.ui:ui", version.ref = "composeMultiplatform" }
 compose-components-resources = { module = "org.jetbrains.compose.components:components-resources", version.ref = "composeMultiplatform" }
+multiplatform-settings = { module = "com.russhwolf:multiplatform-settings-no-arg", version.ref = "multiplatformSettings" }
 compose-uiToolingPreview = { module = "org.jetbrains.compose.ui:ui-tooling-preview", version.ref = "composeMultiplatform" }
 
 [plugins]

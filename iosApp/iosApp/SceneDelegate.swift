@@ -1,6 +1,5 @@
 import UIKit
-import Matreshka
-//import Dbo
+import Habit
 
 // ХАК ДЛЯ ОБХОДА ТРЕБОВАНИЙ COMPOSE MULTIPLATFORM НА XCODE 14:
 @objc(UITextLoupeSession)
@@ -22,39 +21,38 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         // 2. Создаем системный контейнер табов (Bottom Navigation)
         let tabBarController = UITabBarController()
         
-        // 3. Вызываем Compose Multiplatform экран из модуля Matreshka
-        let matreshkaVC = MatreshkaMainKt.MatreshkaViewController {
+        // 3. Вызываем Compose Multiplatform экран из модуля Habit
+        let habitVC = HabitMainKt.HabitViewController {
             
         }
-        matreshkaVC.tabBarItem = UITabBarItem(title: "Matreshka", image: nil, tag: 0)
+        habitVC.tabBarItem = UITabBarItem(title: "Habit", image: nil, tag: 0)
         
-        // 4. Вызываем Compose Multiplatform экран из модуля DBO
-        let dboVC = DboMainKt.DboViewController()
-        dboVC.tabBarItem = UITabBarItem(title: "DBO", image: nil, tag: 1)
+        // 4. Вызываем Compose Multiplatform экран из модуля Opt
+        let optVC = OptMainKt.OptViewController()
+        optVC.tabBarItem = UITabBarItem(title: "Opt", image: nil, tag: 1)
         
         // 5. Помещаем оба экрана в табы
-        tabBarController.viewControllers = [matreshkaVC, dboVC]
+        tabBarController.viewControllers = [habitVC, optVC]
         
         // 6. Делаем таб-бар корневым и отображаем окно
         //window.rootViewController = tabBarController
         
         // Проверяем реальное сохранение на устройстве через Kotlin
-        if MatreshkaMainKt.isUserLoggedIn() {
+        if HabitMainKt.isUserLoggedIn() {
             print("Пользователь уже авторизован. Открываем табы.")
             window.rootViewController = tabBarController
         } else {
             print("Пользователь не авторизован. Показываем Login.")
             
             // Создаем LoginViewController и передаем логику переключения на табы при успехе
-            let loginVC = MatreshkaMainKt.MatreshkaViewController() {
+            let loginVC = HabitMainKt.HabitViewController() {
                 DispatchQueue.main.async {
                     window.rootViewController = tabBarController
                 }
             }
             window.rootViewController = loginVC
         }
-        
-        
+
         self.window = window
         window.makeKeyAndVisible()
     }

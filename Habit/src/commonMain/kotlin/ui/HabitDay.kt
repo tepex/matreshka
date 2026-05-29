@@ -2,35 +2,61 @@ package com.habitloop.app.habit.ui
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.DirectionsRun
-import androidx.compose.material.icons.automirrored.filled.MenuBook
-import androidx.compose.material.icons.filled.*
-import androidx.compose.material3.*
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.BarChart
+import androidx.compose.material.icons.filled.CalendarToday
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.NavigationBarItemDefaults
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.habitloop.app.habit.data.defaultHabits
+import com.habitloop.app.habit.ui.model.HabitItem
+import com.habitloop.app.habit.ui.model.toAbbr
+import com.habitloop.app.habit.ui.model.toHabitItem
+import com.habitloop.app.habit.ui.model.toRu
+import com.russhwolf.settings.Settings
+import kotlinx.datetime.Clock
+import kotlinx.datetime.DateTimeUnit
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.minus
+import kotlinx.datetime.plus
+import kotlinx.datetime.toLocalDateTime
 import org.jetbrains.compose.ui.tooling.preview.Preview
-
-// Модель данных для привычки
-data class HabitItem(
-    val id: Int,
-    val title: String,
-    val subtitle: String,
-    val icon: ImageVector,
-    val iconBgColor: Color,
-    val isCompleted: Boolean
-)
 
 @Composable
 fun HabitDayScreen(
@@ -44,13 +70,23 @@ fun HabitDayScreen(
     val textGray = Color(0xFF8A8A8E)
     val brandBlue = Color(0xFF3B638A)
 
-    // Тестовый список привычек из макета
-    val habits = listOf(
-        HabitItem(1, "Утренняя пробежка", "11 дней", Icons.AutoMirrored.Filled.DirectionsRun, Color(0xFF0066CC), true),
-        HabitItem(2, "Чтение 30 мин", "5 дней", Icons.AutoMirrored.Filled.MenuBook, Color(0xFF1C1C1E), true),
-        HabitItem(3, "Медитация", "31 день подряд - рекорд!", Icons.Default.SelfImprovement, Color(0xFFE53935), false),
-        HabitItem(4, "Пить воду 2л", "0 дней", Icons.Default.LocalCafe, Color(0xFFFFB300), false)
-    )
+    //val settings = remember { Settings() }
+    val today = remember { Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date }
+
+    val headerDateString = "${today.dayOfWeek.toRu()}, ${today.dayOfMonth} ${today.month.toRu()}"
+    // горизонтальная плашка недели
+    val weekDays = remember(today) {
+        val currentDayOfWeekOrdinal = today.dayOfWeek.ordinal // 0 для Пн, 6 для Вс
+        val mondayOfCurrentWeek = today.minus(currentDayOfWeekOrdinal, DateTimeUnit.DAY)
+
+        List(7) { i ->
+            val day = mondayOfCurrentWeek.plus(i, DateTimeUnit.DAY)
+            Pair(day.dayOfMonth.toString(), day.dayOfWeek.toAbbr())
+        }
+    }
+
+    // Инициализируем стейт.
+    var habitsList by remember { mutableStateOf(defaultHabits) }
 
     Scaffold(
         containerColor = bgLightBlue,
@@ -116,7 +152,7 @@ fun HabitDayScreen(
             ) {
                 Column {
                     Text(text = "Алина, доброе утро!", fontSize = 14.sp, color = textGray)
-                    Text(text = "Четверг, 2 апреля", fontSize = 20.sp, fontWeight = FontWeight.Bold, color = textDark)
+                    Text(text = headerDateString, fontSize = 20.sp, fontWeight = FontWeight.Bold, color = textDark)
                 }
                 // Имитация круглой аватарки
                 Box(
@@ -136,9 +172,8 @@ fun HabitDayScreen(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                val days = listOf("30" to "Пн", "31" to "Вт", "1" to "Ср", "2" to "Чт", "3" to "Пт", "4" to "Сб", "5" to "Вс")
-                days.forEach { (date, dayName) ->
-                    val isSelected = date == "2" // Четверг по макету
+                weekDays.forEach { (date, dayName) ->
+                    val isSelected = date == today.dayOfMonth.toString()
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.spacedBy(6.dp)
@@ -171,13 +206,13 @@ fun HabitDayScreen(
                 verticalArrangement = Arrangement.spacedBy(12.dp),
                 modifier = Modifier.fillMaxWidth()
             ) {
-                items(habits) { habit ->
+                items(habitsList) { habit ->
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
                             .clickable { onHabitClick(habit.id) }
                     ) {
-                        HabitCard(habit = habit)
+                        HabitCard(habit = habit.toHabitItem())
                     }
                 }
             }

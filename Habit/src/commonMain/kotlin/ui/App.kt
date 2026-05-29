@@ -19,7 +19,6 @@ fun App() {
             delay(3000)
 
             val isLogged = settings.getBoolean("is_logged_in", false)
-
             currentScreen = if (isLogged) AppScreen.HABIT_DAY else AppScreen.WELCOME1
         }
     }

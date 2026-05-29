@@ -24,7 +24,7 @@ import com.russhwolf.settings.set
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
 enum class AuthStep {
-    ENTER_PHONE, ENTER_CODE/*, HABIT_DAY*/
+    ENTER_PHONE, ENTER_CODE
 }
 
 @Composable
@@ -161,7 +161,6 @@ fun LoginScreen(
 
                                 focusManager.clearFocus()
                                 onSuccess()
-                                //currentStep = AuthStep.HABIT_DAY
                             } else {
                                 // Email НЕ совпал с сохраненным (или пустой) -> идем запрашивать код "0000"
                                 isEmailError = false
@@ -260,7 +259,6 @@ fun LoginScreen(
                                 settings["is_logged_in"] = true
                                 settings["saved_email"] = email.trim().lowercase()
                                 focusManager.clearFocus()
-                                //currentStep = AuthStep.HABIT_DAY
                                 onSuccess()
                             } else {
                                 isCodeError = true
@@ -283,10 +281,6 @@ fun LoginScreen(
                         textAlign = TextAlign.Center
                     )
                 }
-                /*
-                AuthStep.HABIT_DAY -> {
-                    HabitDayScreen()
-                }*/
             }
         }
     }

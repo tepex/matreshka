@@ -19,10 +19,12 @@ agp = "9.1.1"
 kotlin = "2.1.0"
 #kotlin = "1.9.23"
 material3 = "1.6.11"
+kotlinxDatetime = "0.6.0"
 junit = "4.13.2"
 
 
 [libraries]
+kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "kotlinxDatetime" }
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
 kotlin-testJunit = { module = "org.jetbrains.kotlin:kotlin-test-junit", version.ref = "kotlin" }
 junit = { module = "junit:junit", version.ref = "junit" }

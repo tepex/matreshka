@@ -35,7 +35,7 @@ kotlin {
        minSdk = libs.versions.android.minSdk.get().toInt()
     
        compilerOptions {
-           jvmTarget = JvmTarget.JVM_11
+           jvmTarget = JvmTarget.JVM_17
        }
     }
     
@@ -55,6 +55,7 @@ kotlin {
             implementation(compose.materialIconsExtended)
             implementation(libs.multiplatform.settings)
             implementation(libs.kotlinx.serialization.json)
+            implementation(libs.kotlinx.datetime)
 
             implementation(compose.components.uiToolingPreview)
 

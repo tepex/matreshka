@@ -11,12 +11,16 @@ enum class AppScreen {
 
 @Composable
 fun App() {
+    val settings = remember { com.russhwolf.settings.Settings() }
     var currentScreen by remember { mutableStateOf(AppScreen.SPLASH) }
 
     if (currentScreen == AppScreen.SPLASH) {
         LaunchedEffect(Unit) {
             delay(3000)
-            currentScreen = AppScreen.WELCOME1
+
+            val isLogged = settings.getBoolean("is_logged_in", false)
+
+            currentScreen = if (isLogged) AppScreen.HABIT_DAY else AppScreen.WELCOME1
         }
     }
 

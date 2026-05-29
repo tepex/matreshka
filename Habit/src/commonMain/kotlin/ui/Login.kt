@@ -24,7 +24,7 @@ import com.russhwolf.settings.set
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
 enum class AuthStep {
-    ENTER_PHONE, ENTER_CODE, HABIT_DAY
+    ENTER_PHONE, ENTER_CODE/*, HABIT_DAY*/
 }
 
 @Composable
@@ -44,9 +44,6 @@ fun LoginScreen(
     // Для управления скрытым полем ввода кода
     val focusRequester = remember { FocusRequester() }
     val focusManager = LocalFocusManager.current
-
-    // Имитация базы данных сохраненных email-адресов
-    val savedEmails = remember { setOf("test@mail.com", "user@habitloop.app", "admin@youplan.ru") }
 
     val backgroundWhite = Color(0xFFFFFFFF)
     val brandRed = Color(0xFFE53935)
@@ -107,6 +104,7 @@ fun LoginScreen(
 
             when (currentStep) {
                 AuthStep.ENTER_PHONE -> {
+                    println("[Habit]: saved_email on start: ${settings.getString("saved_email", "")}")
                     Text(
                         text = "Войди, чтобы сохранять привычки",
                         fontSize = 16.sp,
@@ -162,8 +160,8 @@ fun LoginScreen(
                                 settings["is_logged_in"] = true
 
                                 focusManager.clearFocus()
-                                //onSuccess()
-                                currentStep = AuthStep.HABIT_DAY
+                                onSuccess()
+                                //currentStep = AuthStep.HABIT_DAY
                             } else {
                                 // Email НЕ совпал с сохраненным (или пустой) -> идем запрашивать код "0000"
                                 isEmailError = false
@@ -262,7 +260,8 @@ fun LoginScreen(
                                 settings["is_logged_in"] = true
                                 settings["saved_email"] = email.trim().lowercase()
                                 focusManager.clearFocus()
-                                currentStep = AuthStep.HABIT_DAY
+                                //currentStep = AuthStep.HABIT_DAY
+                                onSuccess()
                             } else {
                                 isCodeError = true
                             }
@@ -284,9 +283,10 @@ fun LoginScreen(
                         textAlign = TextAlign.Center
                     )
                 }
+                /*
                 AuthStep.HABIT_DAY -> {
                     HabitDayScreen()
-                }
+                }*/
             }
         }
     }

@@ -12,6 +12,7 @@ data class Habit(
     val name: Name,
     val description: Description,
     val type: Type,
+    val typeColor: TypeColor,
     @Serializable(with = LocalDateComponentSerializer::class)
     val createdDate: LocalDate,
     val isCompleted: Boolean
@@ -31,6 +32,20 @@ data class Habit(
 
     @Serializable
     enum class Type {
-        RUN, READ, MEDITATE, DRINK, EXERCISE, OTHER
+        RUN, READ, MEDITATE, DRINK, TENNIS, BASKETBALL, SOCCER
+
     }
+
+    @Serializable
+    enum class TypeColor {
+        COLOR1,
+        COLOR2,
+        COLOR3,
+        COLOR4,
+        COLOR5,
+        COLOR6,
+        COLOR7
+
+    }
+
 }

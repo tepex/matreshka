@@ -22,6 +22,7 @@ class HabitRepositoryImpl(private val storage: HabitStorage) : HabitRepository {
             name = dto.name,
             description = dto.description,
             type = dto.type,
+            typeColor = dto.typeColor,
             createdDate = dto.createdDate,
             false
         )

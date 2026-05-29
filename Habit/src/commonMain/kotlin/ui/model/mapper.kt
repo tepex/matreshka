@@ -3,34 +3,45 @@ package com.habitloop.app.habit.ui.model
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.DirectionsRun
 import androidx.compose.material.icons.automirrored.filled.HelpOutline
-import androidx.compose.material.icons.filled.Book
-import androidx.compose.material.icons.filled.FitnessCenter
+import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.material.icons.filled.LocalDrink
 import androidx.compose.material.icons.filled.SelfImprovement
+import androidx.compose.material.icons.filled.SportsBasketball
+import androidx.compose.material.icons.filled.SportsSoccer
+import androidx.compose.material.icons.filled.SportsTennis
 import androidx.compose.ui.graphics.Color
 import com.habitloop.app.habit.domain.Habit
 import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.Month
 
-fun Habit.toHabitItem(isCompleted: Boolean): HabitItem {
-    val (icon, color) = when (type) {
-        Habit.Type.RUN -> Pair(Icons.AutoMirrored.Filled.DirectionsRun, Color(0xFFE57373))
-        Habit.Type.READ -> Pair(Icons.Default.Book, Color(0xFF64B5F6))
-        Habit.Type.MEDITATE -> Pair(Icons.Default.SelfImprovement, Color(0xFF81C784))
-        Habit.Type.DRINK -> Pair(Icons.Default.LocalDrink, Color(0xFFFFB74D))
-        Habit.Type.EXERCISE -> Pair(Icons.Default.FitnessCenter, Color(0xFFBA68C8))
-        Habit.Type.OTHER -> Pair(Icons.AutoMirrored.Filled.HelpOutline, Color(0xFF90A4AE))
-    }
+fun Habit.toIcon() = when (type) {
+    Habit.Type.RUN -> Icons.AutoMirrored.Filled.DirectionsRun
+    Habit.Type.READ -> Icons.AutoMirrored.Filled.MenuBook
+    Habit.Type.MEDITATE -> Icons.Default.SelfImprovement
+    Habit.Type.DRINK -> Icons.Default.LocalDrink
+    Habit.Type.TENNIS -> Icons.Default.SportsTennis
+    Habit.Type.BASKETBALL -> Icons.Default.SportsBasketball
+    Habit.Type.SOCCER -> Icons.Default.SportsSoccer
+}
 
-    return HabitItem(
+fun Habit.toColor() = when (typeColor) {
+    Habit.TypeColor.COLOR1 -> Color(0xFF0066CC)
+    Habit.TypeColor.COLOR2 -> Color(0xFFE53935)
+    Habit.TypeColor.COLOR3 -> Color(0xFFFFB300)
+    Habit.TypeColor.COLOR4 -> Color(0xFF4CAF50)
+    Habit.TypeColor.COLOR5 -> Color(0xFF1C1C1E)
+    Habit.TypeColor.COLOR6 -> Color(0xFF9C27B0)
+    Habit.TypeColor.COLOR7 -> Color(0xFFC7A167)
+}
+fun Habit.toHabitItem(isCompleted: Boolean): HabitItem =
+    HabitItem(
         id = this.id.value,
         title = this.name.value,
         subtitle = this.description.value,
-        icon = icon,
-        iconBgColor = color,
+        icon = toIcon(),
+        iconBgColor = toColor(),
         isCompleted = isCompleted
     )
-}
 
 fun DayOfWeek.toAbbr(): String =
     listOf("Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс")[ordinal]

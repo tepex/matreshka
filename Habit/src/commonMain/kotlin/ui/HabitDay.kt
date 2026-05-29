@@ -62,6 +62,7 @@ import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @Composable
 fun HabitDayScreen(
+    // Для preview
     onAddHabitClick: () -> Unit = {},
     onHabitClick: (Int) -> Unit = {},
     onTabClick: (AppScreen) -> Unit = {}

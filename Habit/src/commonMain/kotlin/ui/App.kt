@@ -64,7 +64,7 @@ fun AppContent(
             )
             AppScreen.NEW_HABIT -> NewHabitScreen(
                 onBackClick = { onScreenChange(AppScreen.HABIT_DAY) },
-                onSaveClick = { onScreenChange(AppScreen.HABIT_DAY) }
+                //onSaveClick = { onScreenChange(AppScreen.HABIT_DAY) }
             )
             AppScreen.HABIT_DETAILS -> HabitDetailsScreen(
                 onBackClick = { onScreenChange(AppScreen.HABIT_DAY) },

@@ -13,7 +13,8 @@ data class Habit(
     val description: Description,
     val type: Type,
     @Serializable(with = LocalDateComponentSerializer::class)
-    val createdDate: LocalDate
+    val createdDate: LocalDate,
+    val isCompleted: Boolean
 ) {
 
     @Serializable

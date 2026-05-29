@@ -12,7 +12,7 @@ import com.habitloop.app.habit.domain.Habit
 import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.Month
 
-fun Habit.toHabitItem(): HabitItem {
+fun Habit.toHabitItem(isCompleted: Boolean): HabitItem {
     val (icon, color) = when (type) {
         Habit.Type.RUN -> Pair(Icons.AutoMirrored.Filled.DirectionsRun, Color(0xFFE57373))
         Habit.Type.READ -> Pair(Icons.Default.Book, Color(0xFF64B5F6))
@@ -23,9 +23,9 @@ fun Habit.toHabitItem(): HabitItem {
     }
 
     return HabitItem(
-        id = id,
-        title = name,
-        subtitle = description,
+        id = this.id.value,
+        title = this.name.value,
+        subtitle = this.description.value,
         icon = icon,
         iconBgColor = color,
         isCompleted = isCompleted

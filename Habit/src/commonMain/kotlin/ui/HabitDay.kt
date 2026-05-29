@@ -44,12 +44,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.habitloop.app.habit.data.defaultHabits
+import com.habitloop.app.habit.data.HabitRepositoryImpl
+import com.habitloop.app.habit.data.HabitStorage
+import com.habitloop.app.habit.domain.Habit
+import com.habitloop.app.habit.domain.HabitRepository
 import com.habitloop.app.habit.ui.model.HabitItem
 import com.habitloop.app.habit.ui.model.toAbbr
 import com.habitloop.app.habit.ui.model.toHabitItem
 import com.habitloop.app.habit.ui.model.toRu
-import com.russhwolf.settings.Settings
 import kotlinx.datetime.Clock
 import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.TimeZone
@@ -70,8 +72,11 @@ fun HabitDayScreen(
     val textGray = Color(0xFF8A8A8E)
     val brandBlue = Color(0xFF3B638A)
 
-    //val settings = remember { Settings() }
+    val repository: HabitRepository = remember { HabitRepositoryImpl(HabitStorage()) }
+
     val today = remember { Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date }
+    var selectedDate by remember { mutableStateOf(today) }
+    var stateUpdateTrigger by remember { mutableStateOf(0) }
 
     val headerDateString = "${today.dayOfWeek.toRu()}, ${today.dayOfMonth} ${today.month.toRu()}"
     // горизонтальная плашка недели
@@ -79,14 +84,23 @@ fun HabitDayScreen(
         val currentDayOfWeekOrdinal = today.dayOfWeek.ordinal // 0 для Пн, 6 для Вс
         val mondayOfCurrentWeek = today.minus(currentDayOfWeekOrdinal, DateTimeUnit.DAY)
 
-        List(7) { i ->
+        List(7) { i -> List(7) { i -> mondayOfCurrentWeek.plus(i, DateTimeUnit.DAY) }
             val day = mondayOfCurrentWeek.plus(i, DateTimeUnit.DAY)
             Pair(day.dayOfMonth.toString(), day.dayOfWeek.toAbbr())
         }
     }
 
     // Инициализируем стейт.
-    var habitsList by remember { mutableStateOf(defaultHabits) }
+    val habitsList = remember(selectedDate, stateUpdateTrigger) {
+        val domainHabits = repository.getHabits()
+
+        domainHabits
+            .filter { it.createdDate <= selectedDate }
+            .map { habit ->
+                val isCompleted = repository.isHabitCompleted(habit.id, selectedDate)
+                habit.toHabitItem(isCompleted = isCompleted)
+            }
+    }
 
     Scaffold(
         containerColor = bgLightBlue,
@@ -210,9 +224,13 @@ fun HabitDayScreen(
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .clickable { onHabitClick(habit.id) }
+                            .clickable {
+                                val intId = habit.id
+                                repository.toggleHabitCompletion(Habit.Id(intId), selectedDate)
+                                ++stateUpdateTrigger
+                            }
                     ) {
-                        HabitCard(habit = habit.toHabitItem())
+                        HabitCard(habit = habit)
                     }
                 }
             }

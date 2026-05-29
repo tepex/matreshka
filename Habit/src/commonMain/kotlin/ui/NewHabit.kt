@@ -61,6 +61,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.habitloop.app.habit.domain.Habit
+import com.habitloop.app.habit.ui.model.toColor
+import com.habitloop.app.habit.ui.model.toIcon
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -98,22 +101,6 @@ fun NewHabitScreen(
     // Списки для генерации меню
     val hoursList = (0..23).map { it.toString().padStart(2, '0') }
     val minutesList = listOf(0, 15, 30, 45).map { it.toString().padStart(2, '0') }
-
-    // Массивы ресурсов (Иконки и Цвета)
-    val iconsList = listOf(
-        Icons.AutoMirrored.Filled.DirectionsRun,
-        Icons.AutoMirrored.Filled.MenuBook,
-        Icons.Default.SelfImprovement,
-        Icons.Default.LocalDrink,
-        Icons.Default.SportsTennis,
-        Icons.Default.SportsBasketball,
-        Icons.Default.SportsSoccer
-    )
-
-    val colorsList = listOf(
-        Color(0xFF0066CC), Color(0xFFE53935), Color(0xFFFFB300),
-        Color(0xFF4CAF50), Color(0xFF1C1C1E), Color(0xFF9C27B0), Color(0xFFC7A167)
-    )
 
     val daysOfWeek = listOf(
         1 to "Пн", 2 to "Вт", 3 to "Ср", 4 to "Чт", 5 to "Пт", 6 to "Сб", 7 to "Вс"
@@ -206,7 +193,7 @@ fun NewHabitScreen(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                iconsList.forEachIndexed { i, icon ->
+                Habit.Type.entries.forEachIndexed { i, type ->
                     val isSelected = i == selectedIconIndex
                     Box(
                         modifier = Modifier
@@ -226,7 +213,7 @@ fun NewHabitScreen(
                             contentAlignment = Alignment.Center
                         ) {
                             Icon(
-                                imageVector = icon,
+                                imageVector = type.toIcon(),
                                 contentDescription = null,
                                 tint = if (isSelected) Color.White else brandBlue,
                                 modifier = Modifier.size(22.dp)
@@ -245,9 +232,9 @@ fun NewHabitScreen(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                colorsList.forEachIndexed { i, color ->
+                Habit.TypeColor.entries.forEachIndexed { i, typeColor ->
                     val isSelected = i == selectedColorIndex
-                    val isColorLight = color == Color(0xFFFFB300)
+                    val isColorLight = typeColor == Habit.TypeColor.COLOR3
 
                     Box(
                         modifier = Modifier
@@ -257,7 +244,7 @@ fun NewHabitScreen(
                     ) {
                         Box(
                             modifier = Modifier.size(40.dp)
-                                .background(color = color, shape = CircleShape)
+                                .background(color = typeColor.toColor(), shape = CircleShape)
                                 .clickable { selectedColorIndex = i },
                             contentAlignment = Alignment.Center
                         ) {

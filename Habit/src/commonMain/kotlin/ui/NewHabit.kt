@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -265,31 +266,67 @@ fun NewHabitScreen(
 
             Spacer(modifier = Modifier.height(28.dp))
 
-            // 4. Повторение
-            Row(modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically) {
+            // 4. Повторение (Кастомный Radio-переключатель)
+            Text(text = "Частота", fontSize = 14.sp, color = textGray, fontWeight = FontWeight.Medium)
+            Spacer(modifier = Modifier.height(8.dp))
 
-                Column {
-                    Text(text = "Каждый день", fontSize = 16.sp, color = textDark, fontWeight = FontWeight.SemiBold)
-                    Text(text = "Повторять ежедневно", fontSize = 13.sp, color = textGray)
+            Row(
+                modifier = Modifier.width(300.dp)
+                    .align(Alignment.CenterHorizontally),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                // Вариант 1: Ежедневно
+                Box(
+                    modifier = Modifier
+                        //.width(120.dp)
+                        .weight(1f)
+                        .background(
+                            color = if (isEveryday) brandBlue else Color.Transparent,
+                            shape = RoundedCornerShape(20.dp)
+                        )
+                        .clickable {
+                            isEveryday = true
+                            selectedDays = setOf(1, 2, 3, 4, 5, 6, 7)
+                        }
+                        .padding(vertical = 8.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "Ежедневно",
+                        fontSize = 14.sp,
+                        fontWeight = if (isEveryday) FontWeight.SemiBold else FontWeight.Normal,
+                        color = if (isEveryday) Color.White else textDark
+                    )
                 }
 
-                Switch(
-                    checked = isEveryday,
-                    onCheckedChange = { checked ->
-                        isEveryday = checked
-                        selectedDays = if (checked) setOf(1, 2, 3, 4, 5, 6, 7) else emptySet()
-                    },
-                    colors = SwitchDefaults.colors(
-                        checkedThumbColor = Color.White,
-                        checkedTrackColor = brandBlue,
-                        uncheckedThumbColor = textGray,
-                        uncheckedTrackColor = grayField
+                Spacer(modifier = Modifier.width(40.dp))
+
+                // Вариант 2: По дням недели
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .background(
+                            color = if (!isEveryday) brandBlue else grayField,
+                            shape = RoundedCornerShape(20.dp)
+                        )
+                        .clickable {
+                            isEveryday = false
+                            selectedDays = emptySet() // Сбрасываем для ручного выбора
+                        }
+                        .padding(vertical = 8.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "По дням недели",
+                        fontSize = 14.sp,
+                        fontWeight = if (!isEveryday) FontWeight.SemiBold else FontWeight.Normal,
+                        color = if (!isEveryday) Color.White else textDark
                     )
-                )
+                }
             }
 
+            // Анимированная панель выбора дней недели
             AnimatedVisibility(
                 visible = !isEveryday,
                 enter = fadeIn() + expandVertically(),
@@ -297,25 +334,22 @@ fun NewHabitScreen(
             ) {
                 Column {
                     Spacer(modifier = Modifier.height(16.dp))
-
                     Text(
                         text = "Выберите дни недели",
                         fontSize = 14.sp,
                         color = if (isDaysSelectionValid) textGray else errorRed,
                         fontWeight = FontWeight.Medium
                     )
-
                     Spacer(modifier = Modifier.height(12.dp))
-
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
                         daysOfWeek.forEach { (dayNumber, dayName) ->
                             val isDaySelected = selectedDays.contains(dayNumber)
-
                             Box(
-                                modifier = Modifier.size(40.dp)
+                                modifier = Modifier
+                                    .size(40.dp)
                                     .background(
                                         color = if (isDaySelected) brandBlue else grayField,
                                         shape = CircleShape
@@ -326,7 +360,7 @@ fun NewHabitScreen(
                                         selectedDays = updatedDays
                                         if (updatedDays.size == 7) isEveryday = true
                                     },
-                                    contentAlignment = Alignment.Center
+                                contentAlignment = Alignment.Center
                             ) {
                                 Text(
                                     text = dayName,
@@ -341,6 +375,9 @@ fun NewHabitScreen(
             }
 
             Spacer(modifier = Modifier.height(24.dp))
+
+
+
 
             // 5. Напоминания и выбор Времени (Кроссплатформенный Dropdown)
             Row(

@@ -2,7 +2,6 @@ package com.habitloop.app.habit.ui.model
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.DirectionsRun
-import androidx.compose.material.icons.automirrored.filled.HelpOutline
 import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.material.icons.filled.LocalDrink
 import androidx.compose.material.icons.filled.SelfImprovement
@@ -10,7 +9,7 @@ import androidx.compose.material.icons.filled.SportsBasketball
 import androidx.compose.material.icons.filled.SportsSoccer
 import androidx.compose.material.icons.filled.SportsTennis
 import androidx.compose.ui.graphics.Color
-import com.habitloop.app.habit.domain.Habit
+import com.habitloop.app.habit.domain.model.Habit
 import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.Month
 

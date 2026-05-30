@@ -1,6 +1,6 @@
 package com.habitloop.app.habit.data
 
-import com.habitloop.app.habit.domain.Habit
+import com.habitloop.app.habit.domain.model.Habit
 import kotlinx.datetime.Clock
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime

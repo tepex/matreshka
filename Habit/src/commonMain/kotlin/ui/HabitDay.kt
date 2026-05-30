@@ -46,7 +46,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.habitloop.app.habit.data.HabitRepositoryImpl
 import com.habitloop.app.habit.data.HabitStorage
-import com.habitloop.app.habit.domain.Habit
+import com.habitloop.app.habit.domain.model.Habit
 import com.habitloop.app.habit.domain.HabitRepository
 import com.habitloop.app.habit.ui.model.HabitItem
 import com.habitloop.app.habit.ui.model.toAbbr

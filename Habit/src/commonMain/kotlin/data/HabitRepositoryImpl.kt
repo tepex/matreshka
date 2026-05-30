@@ -1,7 +1,6 @@
 package com.habitloop.app.habit.data
 
-import com.habitloop.app.habit.domain.Habit
-import com.habitloop.app.habit.domain.HabitDto
+import com.habitloop.app.habit.domain.model.Habit
 import com.habitloop.app.habit.domain.HabitRepository
 import kotlinx.datetime.LocalDate
 

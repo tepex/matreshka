@@ -1,11 +1,7 @@
 package com.habitloop.app.habit.data
 
 import com.russhwolf.settings.Settings
-import com.habitloop.app.habit.domain.Habit
-import kotlinx.datetime.Clock
-import kotlinx.datetime.LocalDate
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.toLocalDateTime
+import com.habitloop.app.habit.domain.model.Habit
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.encodeToString
 

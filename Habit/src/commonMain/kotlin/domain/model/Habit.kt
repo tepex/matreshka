@@ -32,7 +32,11 @@ class Habit(
 
         @Serializable
         @JvmInline
-        value class Name(val value: String)
+        value class Name(val value: String) {
+            init {
+                require(value.isNotBlank() && value.length <= 40)
+            }
+        }
 
         @Serializable
         enum class IconType {
@@ -52,65 +56,26 @@ class Habit(
         }
 
         @Serializable
-        @JvmInline
-        value class Weekly(val value: BooleanArray = BooleanArray(7) { false} )
+        data class Weekly(val value: BooleanArray = BooleanArray(7) { false}) {
+            override fun equals(other: Any?): Boolean {
+                if (other !is Weekly) return false
+                return this.value.contentEquals(other.value)
+            }
+
+            override fun hashCode(): Int {
+                return this.value.contentHashCode()
+            }
+        }
+
     }
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (other == null || this::class != other::class) return false
-
         other as Habit
-
         return id == other.id
     }
 
     override fun hashCode(): Int =
         id.hashCode()
 }
-
-/*
-@Serializable
-data class Habit1(
-    val id: Id,
-    val name: Name,
-    val description: Description,
-    val type: Type,
-    val typeColor: TypeColor,
-    @Serializable(with = LocalDateComponentSerializer::class)
-    val createdDate: LocalDate,
-    val isCompleted: Boolean
-) {
-
-    @Serializable
-    @JvmInline
-    value class Id(val value: Int)
-
-    @Serializable
-    @JvmInline
-    value class Name(val value: String)
-
-    @Serializable
-    @JvmInline
-    value class Description(val value: String)
-
-    @Serializable
-    enum class Type {
-        RUN, READ, MEDITATE, DRINK, TENNIS, BASKETBALL, SOCCER
-
-    }
-
-    @Serializable
-    enum class TypeColor {
-        COLOR1,
-        COLOR2,
-        COLOR3,
-        COLOR4,
-        COLOR5,
-        COLOR6,
-        COLOR7
-
-    }
-
-}
-*/

@@ -13,32 +13,31 @@ import com.habitloop.app.habit.domain.model.Habit
 import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.Month
 
-fun Habit.Type.toIcon() = when (this) {
-    Habit.Type.RUN -> Icons.AutoMirrored.Filled.DirectionsRun
-    Habit.Type.READ -> Icons.AutoMirrored.Filled.MenuBook
-    Habit.Type.MEDITATE -> Icons.Default.SelfImprovement
-    Habit.Type.DRINK -> Icons.Default.LocalDrink
-    Habit.Type.TENNIS -> Icons.Default.SportsTennis
-    Habit.Type.BASKETBALL -> Icons.Default.SportsBasketball
-    Habit.Type.SOCCER -> Icons.Default.SportsSoccer
+fun Habit.Data.IconType.toIcon() = when (this) {
+    Habit.Data.IconType.ICON1 -> Icons.AutoMirrored.Filled.DirectionsRun
+    Habit.Data.IconType.ICON2 -> Icons.AutoMirrored.Filled.MenuBook
+    Habit.Data.IconType.ICON3 -> Icons.Default.SelfImprovement
+    Habit.Data.IconType.ICON4 -> Icons.Default.LocalDrink
+    Habit.Data.IconType.ICON5 -> Icons.Default.SportsTennis
+    Habit.Data.IconType.ICON6 -> Icons.Default.SportsBasketball
+    Habit.Data.IconType.ICON7 -> Icons.Default.SportsSoccer
 }
 
-fun Habit.TypeColor.toColor() = when (this) {
-    Habit.TypeColor.COLOR1 -> Color(0xFF0066CC)
-    Habit.TypeColor.COLOR2 -> Color(0xFFE53935)
-    Habit.TypeColor.COLOR3 -> Color(0xFFFFB300)
-    Habit.TypeColor.COLOR4 -> Color(0xFF4CAF50)
-    Habit.TypeColor.COLOR5 -> Color(0xFF1C1C1E)
-    Habit.TypeColor.COLOR6 -> Color(0xFF9C27B0)
-    Habit.TypeColor.COLOR7 -> Color(0xFFC7A167)
+fun Habit.Data.ColorType.toColor() = when (this) {
+    Habit.Data.ColorType.COLOR1 -> Color(0xFF0066CC)
+    Habit.Data.ColorType.COLOR2 -> Color(0xFFE53935)
+    Habit.Data.ColorType.COLOR3 -> Color(0xFFFFB300)
+    Habit.Data.ColorType.COLOR4 -> Color(0xFF4CAF50)
+    Habit.Data.ColorType.COLOR5 -> Color(0xFF1C1C1E)
+    Habit.Data.ColorType.COLOR6 -> Color(0xFF9C27B0)
+    Habit.Data.ColorType.COLOR7 -> Color(0xFFC7A167)
 }
 fun Habit.toHabitItem(isCompleted: Boolean): HabitItem =
     HabitItem(
-        id = this.id.value,
-        title = this.name.value,
-        subtitle = this.description.value,
-        icon = type.toIcon(),
-        iconBgColor = typeColor.toColor(),
+        id = id.value,
+        name = data.name.value,
+        icon = data.icon.toIcon(),
+        iconBgColor = data.color.toColor(),
         isCompleted = isCompleted
     )
 

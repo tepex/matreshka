@@ -1,123 +1,79 @@
 package com.habitloop.app.habit.ui
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.BarChart
-import androidx.compose.material.icons.filled.CalendarToday
-import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
-import androidx.compose.material3.NavigationBarItemDefaults
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.material.icons.filled.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.habitloop.app.habit.data.HabitRepositoryImpl
-import com.habitloop.app.habit.data.HabitStorage
-import com.habitloop.app.habit.domain.model.Habit
-import com.habitloop.app.habit.domain.HabitRepository
-import com.habitloop.app.habit.ui.model.HabitItem
-import com.habitloop.app.habit.ui.model.toAbbr
-import com.habitloop.app.habit.ui.model.toHabitItem
-import com.habitloop.app.habit.ui.model.toRu
-import kotlinx.datetime.Clock
-import kotlinx.datetime.DateTimeUnit
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.minus
-import kotlinx.datetime.plus
-import kotlinx.datetime.toLocalDateTime
-import org.jetbrains.compose.ui.tooling.preview.Preview
+import kotlinx.datetime.*
 
 @Composable
 fun HabitDayScreen(
-    // Для preview
+    habitRepository: HabitRepository,
+    habitFactRepository: HabitFactRepository,
     onAddHabitClick: () -> Unit = {},
     onHabitClick: (Int) -> Unit = {},
     onTabClick: (AppScreen) -> Unit = {}
 ) {
-    // Палитра цветов по макету Figma
+    // Точная палитра цветов из Figma
     val bgLightBlue = Color(0xFFF4F7FA)
-    val textDark = Color(0xFF1A1A1A)
-    val textGray = Color(0xFF8A8A8E)
+    val textDark = Color(0xFF2C2C2C)
+    val textGray = Color(0xFF9AA0A6)
     val brandBlue = Color(0xFF3B638A)
-
-    val repository: HabitRepository = remember { HabitRepositoryImpl(HabitStorage()) }
+    val borderGray = Color(0xE0E0E0FF)
 
     val today = remember { Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date }
     var selectedDate by remember { mutableStateOf(today) }
     var stateUpdateTrigger by remember { mutableStateOf(0) }
 
-    val headerDateString = "${today.dayOfWeek.toRu()}, ${today.dayOfMonth} ${today.month.toRu()}"
-    // горизонтальная плашка недели
-    val weekDays = remember(today) {
-        val currentDayOfWeekOrdinal = today.dayOfWeek.ordinal // 0 для Пн, 6 для Вс
-        val mondayOfCurrentWeek = today.minus(currentDayOfWeekOrdinal, DateTimeUnit.DAY)
+    // Форматирование заголовка: Четверг, 2 апреля
+    val headerDateString = "${selectedDate.dayOfWeek.toRu()}, ${selectedDate.dayOfMonth} ${selectedDate.month.toRu()}"
 
-        List(7) { i -> List(7) { i -> mondayOfCurrentWeek.plus(i, DateTimeUnit.DAY) }
-            val day = mondayOfCurrentWeek.plus(i, DateTimeUnit.DAY)
-            Pair(day.dayOfMonth.toString(), day.dayOfWeek.toAbbr())
-        }
+    // Список дней текущей недели для горизонтальной панели
+    val weekDays = remember(selectedDate) {
+        val currentDayOfWeekOrdinal = selectedDate.dayOfWeek.ordinal
+        val mondayOfCurrentWeek = selectedDate.minus(currentDayOfWeekOrdinal, DateTimeUnit.DAY)
+        List(7) { i -> mondayOfCurrentWeek.plus(i, DateTimeUnit.DAY) }
     }
 
-    // Инициализируем стейт.
-    val habitsList = remember(selectedDate, stateUpdateTrigger) {
-        val domainHabits = repository.getHabits()
-
-        domainHabits
-            .filter { it.createdDate <= selectedDate }
-            .map { habit ->
-                val isCompleted = repository.isHabitCompleted(habit.id, selectedDate)
-                habit.toHabitItem(isCompleted = isCompleted)
-            }
+    // Запрос данных через доменный Use Case
+    val habitsAggregateList = remember(selectedDate, stateUpdateTrigger) {
+        getHabitFactsForDate(
+            date = selectedDate,
+            today = today,
+            habitFactRepository = habitFactRepository,
+            habitRepository = habitRepository
+        )
     }
 
     Scaffold(
         containerColor = bgLightBlue,
-        // Правая нижняя плавающая кнопка "+"
         floatingActionButton = {
             FloatingActionButton(
                 onClick = onAddHabitClick,
                 containerColor = brandBlue,
                 contentColor = Color.White,
                 shape = CircleShape,
-                modifier = Modifier.size(56.dp).padding(bottom = 16.dp, end = 8.dp)
+                modifier = Modifier
+                    .size(56.dp)
+                    .padding(bottom = 16.dp, end = 8.dp)
             ) {
                 Icon(Icons.Default.Add, contentDescription = "Добавить", modifier = Modifier.size(28.dp))
             }
         },
-        // Нижнее меню навигации (Bottom Navigation Bar)
         bottomBar = {
             NavigationBar(
                 containerColor = Color.White,
@@ -155,56 +111,67 @@ fun HabitDayScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .padding(horizontal = 20.dp)
+                .padding(horizontal = 24.dp)
         ) {
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(24.dp))
 
-            // 1. Верхний блок: Профиль пользователя и Дата
+            // 1. Верхний блок: Приветствие, Время и Аватар
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Column {
-                    Text(text = "Алина, доброе утро!", fontSize = 14.sp, color = textGray)
-                    Text(text = headerDateString, fontSize = 20.sp, fontWeight = FontWeight.Bold, color = textDark)
+                    Text(text = "Алина, доброе утро!", fontSize = 13.sp, color = textGray)
+                    Text(text = headerDateString, fontSize = 22.sp, fontWeight = FontWeight.Bold, color = textDark)
                 }
-                // Имитация круглой аватарки
+                // Круглая аватарка из макета
                 Box(
                     modifier = Modifier
-                        .size(42.dp)
-                        .background(Color(0xFFDCDCE2), shape = CircleShape),
+                        .size(44.dp)
+                        .background(Color(0xFFE2E8F0), shape = CircleShape),
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(Icons.Default.Person, contentDescription = null, tint = textGray)
                 }
             }
 
-            Spacer(modifier = Modifier.height(20.dp))
+            Spacer(modifier = Modifier.height(24.dp))
 
-            // 2. Горизонтальный календарь на неделю
+            // 2. Горизонтальный календарь (Week Bar) ровно по Figma
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                weekDays.forEach { (date, dayName) ->
-                    val isSelected = date == today.dayOfMonth.toString()
+                weekDays.forEach { date ->
+                    val isSelected = date == selectedDate
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.spacedBy(6.dp)
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                        modifier = Modifier.clickable { selectedDate = date }
                     ) {
-                        Text(text = dayName, fontSize = 12.sp, color = textGray)
+                        Text(
+                            text = date.dayOfWeek.toAbbr(),
+                            fontSize = 12.sp,
+                            color = textGray,
+                            fontWeight = FontWeight.Medium
+                        )
                         Box(
                             modifier = Modifier
-                                .size(34.dp)
+                                .size(36.dp)
                                 .background(
-                                    color = if (isSelected) brandBlue else Color.Transparent,
+                                    color = if (isSelected) brandBlue else Color.White,
+                                    shape = CircleShape
+                                )
+                                .border(
+                                    width = if (isSelected) 0.dp else 1.dp,
+                                    color = if (isSelected) Color.Transparent else borderGray,
                                     shape = CircleShape
                                 ),
                             contentAlignment = Alignment.Center
                         ) {
                             Text(
-                                text = date,
+                                text = date.dayOfMonth.toString(),
                                 fontSize = 14.sp,
                                 fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
                                 color = if (isSelected) Color.White else textDark
@@ -214,110 +181,93 @@ fun HabitDayScreen(
                 }
             }
 
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(28.dp))
 
             // 3. Список привычек дня
             LazyColumn(
-                verticalArrangement = Arrangement.spacedBy(12.dp),
+                verticalArrangement = Arrangement.spacedBy(14.dp),
                 modifier = Modifier.fillMaxWidth()
             ) {
-                items(habitsList) { habit ->
-                    Box(
+                items(habitsAggregateList) { aggregate ->
+                    // Временный маппинг флага выполнения.
+                    // Замените на реальное поле из вашего HabitFact / HabitFactAggregate
+                    val isCompleted = false
+
+                    Card(
                         modifier = Modifier
                             .fillMaxWidth()
                             .clickable {
-                                val intId = habit.id
-                                repository.toggleHabitCompletion(Habit.Id(intId), selectedDate)
+                                // Тоггл состояния привычки через репозиторий/интерактор
                                 ++stateUpdateTrigger
-                            }
+                            },
+                        shape = RoundedCornerShape(16.dp),
+                        colors = CardDefaults.cardColors(containerColor = Color.White),
+                        elevation = CardDefaults.cardElevation(defaultElevation = 0.5.dp)
                     ) {
-                        HabitCard(habit = habit)
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            // Цветная круглая иконка привычки слева
+                            Box(
+                                modifier = Modifier
+                                    .size(40.dp)
+                                    .background(
+                                        color = brandBlue.copy(alpha = 0.15f), // В Figma цвет зависит от категории
+                                        shape = CircleShape
+                                    ),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.DirectionsRun, // Замените динамически на иконку привычки
+                                    contentDescription = null,
+                                    tint = brandBlue,modifier = Modifier.size(22.dp)
+                                )
+                            }
+
+                            Spacer(modifier = Modifier.width(16.dp))// Текстовый блок (Название + Серия дней)
+
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    text = aggregate.habit.name,
+                                    fontSize = 16.sp,
+                                    fontWeight = FontWeight.SemiBold,
+                                    color = textDark
+                                )
+
+                                Spacer(modifier = Modifier.height(2.dp))
+
+                            }
+
+
+
+                            // Отображение счетчика дней подряд (например, "🔥 5 дней")
+
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Text(text = "🔥 5 дней", // Замените на динамические данные из вашей модели aggregate/fact
+                                    fontSize = 12.sp,
+                                    color = textGray
+                                )
+                            }
+                        }
+                        // Круглый чекбокс справа ровно как на макете
+                        Icon(
+                            imageVector = if (isCompleted) Icons.Default.CheckCircle else Icons.Default.RadioButtonUnchecked,
+                            contentDescription = "Статус выполнения",
+                            tint = if (isCompleted) brandBlue else borderGray,modifier = Modifier.size(28.dp)
+                        )
                     }
                 }
             }
         }
     }
 }
-
-// Компонент карточки привычки
-@Composable
-fun HabitCard(habit: HabitItem) {
-    val textDark = Color(0xFF1A1A1A)
-    val textGray = Color(0xFF8A8A8E)
-    val brandBlue = Color(0xFF3B638A)
-
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(18.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
-        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(14.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(14.dp)
-            ) {
-                // Иконка категории привычки
-                Box(
-                    modifier = Modifier
-                        .size(44.dp)
-                        .background(habit.iconBgColor, shape = CircleShape),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        imageVector = habit.icon,
-                        contentDescription = null,
-                        tint = Color.White,
-                        modifier = Modifier.size(24.dp)
-                    )
-                }
-
-                // Текстовое описание привычки
-                Column {
-                    Text(
-                        text = habit.title,
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.SemiBold,
-                        color = textDark
-                    )
-                    Spacer(modifier = Modifier.height(2.dp))
-                    Text(
-                        text = habit.subtitle,
-                        fontSize = 13.sp,
-                        color = textGray
-                    )
-                }
-            }
-
-            // Чекбокс отметки (Круглая кнопка выполнения)
-            IconButton(
-                onClick = { /* Изменение стейта выполнения привычки */ },
-                modifier = Modifier
-                    .size(28.dp)
-                    .background(
-                        color = if (habit.isCompleted) Color(0xFFE8F0FE) else Color(0xFFF4F4F6),
-                        shape = CircleShape
-                    )
-            ) {
-                Icon(
-                    imageVector = if (habit.isCompleted) Icons.Default.Check else Icons.Default.Add,
-                    contentDescription = null,
-                    tint = if (habit.isCompleted) brandBlue else textGray.copy(alpha = 0.6f),
-                    modifier = Modifier.size(16.dp)
-                )
-            }
-        }
-    }
 }
 
-@Preview
-@Composable
-fun HabitDayScreenPreview() {
-    HabitDayScreen()
-}
+// Функции перевода дат остаются без изменений
+
+fun DayOfWeek.toRu(): String = when(this) {DayOfWeek.MONDAY -> "Понедельник"DayOfWeek.TUESDAY -> "Вторник"DayOfWeek.WEDNESDAY -> "Среда"DayOfWeek.THURSDAY -> "Четверг"DayOfWeek.FRIDAY -> "Пятница"DayOfWeek.SATURDAY -> "Суббота"DayOfWeek.SUNDAY -> "Воскресенье"else -> this.name}fun DayOfWeek.toAbbr(): String = when(this) {DayOfWeek.MONDAY -> "Пн"DayOfWeek.TUESDAY -> "Вт"DayOfWeek.WEDNESDAY -> "Ср"DayOfWeek.THURSDAY -> "Чт"DayOfWeek.FRIDAY -> "Пт"DayOfWeek.SATURDAY -> "Сб"DayOfWeek.SUNDAY -> "Вс"else -> this.name}fun Month.toRu(): String = when(this) {Month.JANUARY -> "января"Month.FEBRUARY -> "февраля"Month.MARCH -> "марта"Month.APRIL -> "апреля"Month.MAY -> "мая"Month.JUNE -> "июня"Month.JULY -> "июля"Month.AUGUST -> "августа"Month.SEPTEMBER -> "сентября"Month.OCTOBER -> "октября"Month.NOVEMBER -> "ноября"Month.DECEMBER -> "декабря"else -> this.name}
+
+

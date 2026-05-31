@@ -30,18 +30,18 @@ fun getHabitFactsForDate(
                 repo.getHabitFacts(date)
                     .mapNotNull { fact -> habitMap[fact.habitId]?.let { HabitFactAggregate.create(fact, it) } }
                     .run {
-                        takeIf { date == today }?.let { origin ->
-                            origin.takeIf { it.size < habits.size }?.let {
-                                origin.mapTo(HashSet(origin.size)) { it.fact.habitId }
+                        takeIf { date == today }?.let { originFacts ->
+                            originFacts.takeIf { it.size < habits.size }?.let {
+                                originFacts.mapTo(HashSet(originFacts.size)) { it.fact.habitId }
                                     .let { processedIds ->
                                         buildList(habits.size) {
-                                            addAll(origin)
+                                            addAll(originFacts)
                                             for (habit in habits) {
                                                 if (habit.id !in processedIds) add(HabitFactAggregate.create(habit))
                                             }
                                         }
                                     }
-                            } ?: origin
+                            } ?: originFacts
                         } ?: this
                     }
             } ?: habits.map { HabitFactAggregate.create(habit = it) }

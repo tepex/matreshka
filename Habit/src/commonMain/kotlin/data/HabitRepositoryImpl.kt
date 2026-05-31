@@ -50,6 +50,10 @@ class HabitRepositoryImpl(/*private val storage: HabitStorage*/) : HabitReposito
     }*/
 
     override fun getHabitsByDayOfWeek(day: DayOfWeek): Set<Habit> {
-        return emptySet()
+        //return emptySet()
+        return setOf(
+            Habit.create("test", Habit.Data.IconType.ICON1, Habit.Data.ColorType.COLOR1, 6),
+            Habit.create("test 3", Habit.Data.IconType.ICON3, Habit.Data.ColorType.COLOR3, 6)
+        )
     }
 }

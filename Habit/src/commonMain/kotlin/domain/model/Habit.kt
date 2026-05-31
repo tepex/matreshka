@@ -1,5 +1,6 @@
 package com.habitloop.app.habit.domain.model
 
+import com.habitloop.app.habit.data.HabitIdGenerator
 import kotlinx.serialization.Serializable
 import kotlin.jvm.JvmInline
 
@@ -15,7 +16,7 @@ class Habit(
 
     @JvmInline
     @Serializable
-    value class Id(val value: Int) {
+    value class Id(val value: Int = HabitIdGenerator.nextId()) {
         override fun toString(): String =
             value.toString()
 
@@ -56,7 +57,7 @@ class Habit(
         }
 
         @Serializable
-        data class Weekly(val value: BooleanArray = BooleanArray(7) { false}) {
+        data class Weekly(val value: BooleanArray = BooleanArray(7) { false }) {
             override fun equals(other: Any?): Boolean {
                 if (other !is Weekly) return false
                 return this.value.contentEquals(other.value)
@@ -78,4 +79,20 @@ class Habit(
 
     override fun hashCode(): Int =
         id.hashCode()
+
+    companion object {
+        fun create(
+            name: String,
+            icon: Data.IconType,
+            color: Data.ColorType,
+            dayOfWeek: Int,
+        ): Habit =
+            Data(
+                Data.Name(name),
+                icon,
+                color,
+                Data.Weekly(BooleanArray(7).also { it[dayOfWeek] = true }),
+                false
+            ).let { Habit(Habit.Id(), it) }
+    }
 }

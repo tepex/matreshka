@@ -8,7 +8,7 @@ class UITextLoupeSessionDummy: NSObject {}
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     var window: UIWindow?
     
-    func scene(
+    func scene( 
         _ scene: UIScene,
         willConnectTo session: UISceneSession,
         options connectionOptions: UIScene.ConnectionOptions

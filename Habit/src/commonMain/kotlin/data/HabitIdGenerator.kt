@@ -1,4 +1,4 @@
-package com.habitloop.app.habit.domain
+package com.habitloop.app.habit.data
 
 import kotlin.concurrent.atomics.AtomicInt
 import kotlin.concurrent.atomics.ExperimentalAtomicApi

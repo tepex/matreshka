@@ -10,6 +10,7 @@ import androidx.compose.material.icons.filled.SportsSoccer
 import androidx.compose.material.icons.filled.SportsTennis
 import androidx.compose.ui.graphics.Color
 import com.habitloop.app.habit.domain.model.Habit
+import com.habitloop.app.habit.domain.model.HabitFactAggregate
 import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.Month
 
@@ -32,13 +33,13 @@ fun Habit.Data.ColorType.toColor() = when (this) {
     Habit.Data.ColorType.COLOR6 -> Color(0xFF9C27B0)
     Habit.Data.ColorType.COLOR7 -> Color(0xFFC7A167)
 }
-fun Habit.toHabitItem(isCompleted: Boolean): HabitItem =
+fun HabitFactAggregate.toHabitItem(): HabitItem =
     HabitItem(
-        id = id.value,
-        name = data.name.value,
-        icon = data.icon.toIcon(),
-        iconBgColor = data.color.toColor(),
-        isCompleted = isCompleted
+        id = fact.habitId.value,
+        name = habitData.name.value,
+        icon = habitData.icon.toIcon(),
+        iconBgColor = habitData.color.toColor(),
+        isCompleted = fact.isCompleted
     )
 
 fun DayOfWeek.toAbbr(): String =
@@ -52,3 +53,13 @@ fun Month.toRu(): String =
 
 fun DayOfWeek.toRu(): String =
     listOf("Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота", "Воскресенье")[ordinal]
+
+/**
+ * Функция для правильного склонения слова "день" в зависимости от числа серий подряд
+ */
+fun getDaysWord(streak: Int): String =
+    if ((streak % 100) in 11..19) "дней" else when (streak % 10) {
+        1 -> "день"
+        2, 3, 4 -> "дня"
+        else -> "дней"
+    }

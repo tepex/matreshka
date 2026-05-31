@@ -23,6 +23,7 @@ import com.habitloop.app.habit.domain.HabitFactRepository
 import com.habitloop.app.habit.domain.HabitRepository
 import com.habitloop.app.habit.domain.getHabitFactsForDate
 import com.habitloop.app.habit.domain.model.HabitFactAggregate
+import com.habitloop.app.habit.ui.model.toHabitItem
 import com.habitloop.app.habit.ui.model.toRu
 import kotlinx.datetime.*
 import org.jetbrains.compose.ui.tooling.preview.Preview
@@ -55,7 +56,7 @@ fun HabitDayScreen(
             today = today,
             habitFactRepository = habitFactRepository,
             habitRepository = habitRepository
-        )
+        ).map { aggregate -> aggregate.toHabitItem() }
     }
 
     Scaffold(
@@ -67,11 +68,18 @@ fun HabitDayScreen(
                 containerColor = brandBlue,
                 contentColor = Color.White,
                 shape = CircleShape,
-                modifier = Modifier.size(56.dp).padding(bottom = 16.dp, end = 8.dp)
+                modifier = Modifier
+                    .size(56.dp)
+                    .padding(bottom = 16.dp, end = 8.dp)
             ) {
-                Icon(Icons.Default.Add, contentDescription = "Добавить", modifier = Modifier.size(28.dp))
+                Icon(
+                    Icons.Default.Add,
+                    contentDescription = "Добавить привычку",
+                    modifier = Modifier.size(28.dp)
+                )
             }
         },
+
         // Нижнее меню навигации (Bottom Navigation Bar)
         bottomBar = {
             NavigationBar(
@@ -137,7 +145,7 @@ fun HabitDayScreen(
 
             Spacer(modifier = Modifier.height(20.dp))
 
-            // 2. Горизонтальный календарь на неделю (Вынесенный вами компонент)
+            // 2. Горизонтальный календарь на неделю
             HabitWeekCalendar(
                 selectedDate = selectedDate,
                 today = today,
@@ -148,22 +156,77 @@ fun HabitDayScreen(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // 3. Список привычек дня на базе HabitFactAggregate
+            // 3. Список привычек дня
             LazyColumn(
-                verticalArrangement = Arrangement.spacedBy(12.dp),
+                verticalArrangement = Arrangement.spacedBy(14.dp),
                 modifier = Modifier.fillMaxWidth()
             ) {
-                items(habitsList) { aggregate ->
-                    Box(
+                items(habitsList) { habitItem ->
+                    Card(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .clickable {
-                                // TODO: Реализовать логику клика/переключения статуса через Use Case.
-                                // Будет сделано на следующем шаге после анализа полей доменной модели.
-                                ++stateUpdateTrigger
-                            }
+                            .clickable { onHabitClick(habitItem.id) },
+                        shape = RoundedCornerShape(16.dp),
+                        colors = CardDefaults.cardColors(containerColor = Color.White),
+                        elevation = CardDefaults.cardElevation(defaultElevation = 0.5.dp)
                     ) {
-                        HabitCard(aggregate = aggregate)
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            // Цветной круг с иконкой привычки слева
+                            Box(
+                                modifier = Modifier
+                                    .size(40.dp)
+                                    .background(brandBlue.copy(alpha = 0.12f), shape = CircleShape),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.DirectionsRun, // Добавить динамическую подгрузку иконок позже
+                                    contentDescription = null,
+                                    tint = brandBlue,
+                                    modifier = Modifier.size(22.dp)
+                                )
+                            }
+
+                            Spacer(modifier = Modifier.width(16.dp))
+
+                            // Текстовая секция: Название привычки и серия дней
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    text = habitItem.name,
+                                    fontSize = 16.sp,
+                                    fontWeight = FontWeight.SemiBold,
+                                    color = textDark
+                                )
+                                Spacer(modifier = Modifier.height(2.dp))
+                                Text(
+                                    text = "x days", // TODO: доделать
+                                    // Динамически собираем текст серии с правильным склонением слова "день"
+                                    // text = "🔥 ${habitItem.streak} ${getDaysWord(habitItem.streak)}",
+                                    fontSize = 13.sp,
+                                    color = textGray
+                                )
+                            }
+
+                            // Круглая кнопка-чекбокс отметки выполнения
+                            IconButton(
+                                onClick = {
+                                    // TODO: Инвертировать статус факта выполнения через интерактор
+                                    ++stateUpdateTrigger
+                                },
+                                modifier = Modifier.size(28.dp)
+                            ) {
+                                Icon(
+                                    imageVector = if (habitItem.isCompleted) Icons.Default.CheckCircle else Icons.Default.RadioButtonUnchecked,
+                                    contentDescription = "Отметить выполнение",
+                                    tint = if (habitItem.isCompleted) brandBlue else Color(0xFFBCC2CD),
+                                    modifier = Modifier.size(28.dp)
+                                )
+                            }
+                        }
                     }
                 }
             }

@@ -29,13 +29,6 @@ fun HabitWeekCalendar(
     val borderGray = Color(0xFFE5E5EA) // Светлая подложка-ободок для неактивных дней
 
     // Вычисляем список дней для текущей недели на основе выбранной даты
-    /*
-    val weekDays = remember(today) {
-        val currentDayOfWeekOrdinal = today.dayOfWeek.ordinal
-        val mondayOfCurrentWeek = today.minus(currentDayOfWeekOrdinal, DateTimeUnit.DAY)
-        List(7) { i -> mondayOfCurrentWeek.plus(i, DateTimeUnit.DAY) }
-    }*/
-
     val weekDays = remember(today) {
         List(7) { i -> today.plus(i - 3, DateTimeUnit.DAY) }
     }

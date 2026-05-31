@@ -18,12 +18,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.habitloop.app.habit.DI
 import com.habitloop.app.habit.domain.HabitFactRepository
 import com.habitloop.app.habit.domain.HabitRepository
 import com.habitloop.app.habit.domain.getHabitFactsForDate
 import com.habitloop.app.habit.domain.model.HabitFactAggregate
 import com.habitloop.app.habit.ui.model.toRu
 import kotlinx.datetime.*
+import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @Composable
 fun HabitDayScreen(
@@ -242,4 +244,18 @@ fun HabitCard(aggregate: HabitFactAggregate) {
             )
         }
     }
+}
+
+@Preview
+@Composable
+fun HabitDayScreenPreview() {
+    // Предоставляем фейковые репозитории в экран
+    val di = DI()
+    HabitDayScreen(
+        habitRepository = di.habitRepository,
+        habitFactRepository = di.habitFactRepository,
+        onAddHabitClick = {},
+        onHabitClick = {},
+        onTabClick = {}
+    )
 }

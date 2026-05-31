@@ -12,7 +12,8 @@ import kotlinx.datetime.LocalDate
  * Если для дня недели заданного дня есть [Habit], но нет соответствующего [HabitFact] для текущего дня, то он создается.
  * * Активные — выбираются только те, у которых [Habit] не заморожен.
  *
- * @param date текущий день
+ * @param date заданный день
+ * @param today текущий день
  * @param habitFactRepository репозиторий [HabitFact]
  * @param habitRepository репозиторий [Habit]
  * @return [DayHabitFacts] для текущего дня

@@ -28,15 +28,17 @@ kotlin {
             export(project(":Opt"))
         }
     }
-    
+
     android {
-       namespace = "com.habitloop.app.shared.habit"
-       compileSdk = libs.versions.android.compileSdk.get().toInt()
-       minSdk = libs.versions.android.minSdk.get().toInt()
-    
-       compilerOptions {
-           jvmTarget = JvmTarget.JVM_17
-       }
+        namespace = "com.habitloop.app.shared.habit"
+        compileSdk = libs.versions.android.compileSdk.get().toInt()
+        minSdk = libs.versions.android.minSdk.get().toInt()
+
+        compilerOptions {
+            jvmTarget = JvmTarget.JVM_17
+        }
+
+        withHostTest {}
     }
     
     sourceSets {
@@ -64,6 +66,15 @@ kotlin {
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
+            implementation(libs.kotest.engine)
+            implementation(libs.kotest.assertions)
+            //implementation(libs.kotest.datatest)
+        }
+
+        val androidHostTest by getting {
+            dependencies {
+                implementation(libs.kotest)
+            }
         }
     }
 }

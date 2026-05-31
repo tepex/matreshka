@@ -29,10 +29,15 @@ fun HabitWeekCalendar(
     val borderGray = Color(0xFFE5E5EA) // Светлая подложка-ободок для неактивных дней
 
     // Вычисляем список дней для текущей недели на основе выбранной даты
+    /*
     val weekDays = remember(today) {
         val currentDayOfWeekOrdinal = today.dayOfWeek.ordinal
         val mondayOfCurrentWeek = today.minus(currentDayOfWeekOrdinal, DateTimeUnit.DAY)
         List(7) { i -> mondayOfCurrentWeek.plus(i, DateTimeUnit.DAY) }
+    }*/
+
+    val weekDays = remember(today) {
+        List(7) { i -> today.plus(i - 3, DateTimeUnit.DAY) }
     }
 
     Row(
@@ -43,6 +48,7 @@ fun HabitWeekCalendar(
     ) {
         weekDays.forEach { date ->
             val isSelected = date == selectedDate
+            val isSameMonth = date.month == selectedDate.month
 
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
@@ -62,22 +68,22 @@ fun HabitWeekCalendar(
                 // 2. Круглая плашка с числом месяца
                 Box(
                     modifier = Modifier
-                        .size(36.dp)
+                        .size(40.dp)
                         .background(
-                            color = if (isSelected) brandBlue else Color.White,
+                            color = if (isSelected) brandBlue else Color.Transparent,
                             shape = CircleShape
                         )
                         .border(
-                            width = if (isSelected) 0.dp else 1.dp,
-                            color = if (isSelected) Color.Transparent else borderGray,
+                            width = if (!isSelected && !isSameMonth) 1.5.dp else 0.dp,
+                            color = if (!isSelected && !isSameMonth) borderGray else Color.Transparent,
                             shape = CircleShape
                         ),
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
                         text = date.dayOfMonth.toString(),
-                        fontSize = 14.sp,
-                        fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
+                        fontSize = 16.sp,
+                        fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
                         color = if (isSelected) Color.White else textDark
                     )
                 }

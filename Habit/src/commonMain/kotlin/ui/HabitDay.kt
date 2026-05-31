@@ -1,7 +1,6 @@
 package com.habitloop.app.habit.ui
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -18,6 +17,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.habitloop.app.habit.domain.HabitFactRepository
+import com.habitloop.app.habit.domain.HabitRepository
+import com.habitloop.app.habit.domain.getHabitFactsForDate
+import com.habitloop.app.habit.domain.model.HabitFactAggregate
+import com.habitloop.app.habit.ui.model.toRu
 import kotlinx.datetime.*
 
 @Composable
@@ -28,29 +32,21 @@ fun HabitDayScreen(
     onHabitClick: (Int) -> Unit = {},
     onTabClick: (AppScreen) -> Unit = {}
 ) {
-    // Точная палитра цветов из Figma
+    // Палитра цветов по макету Figma
     val bgLightBlue = Color(0xFFF4F7FA)
-    val textDark = Color(0xFF2C2C2C)
-    val textGray = Color(0xFF9AA0A6)
+    val textDark = Color(0xFF1A1A1A)
+    val textGray = Color(0xFF8A8A8E)
     val brandBlue = Color(0xFF3B638A)
-    val borderGray = Color(0xE0E0E0FF)
 
     val today = remember { Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date }
     var selectedDate by remember { mutableStateOf(today) }
     var stateUpdateTrigger by remember { mutableStateOf(0) }
 
-    // Форматирование заголовка: Четверг, 2 апреля
+    // Текст заголовка (например, "Четверг, 2 апреля") сформирован с помощью ваших новых мапперов
     val headerDateString = "${selectedDate.dayOfWeek.toRu()}, ${selectedDate.dayOfMonth} ${selectedDate.month.toRu()}"
 
-    // Список дней текущей недели для горизонтальной панели
-    val weekDays = remember(selectedDate) {
-        val currentDayOfWeekOrdinal = selectedDate.dayOfWeek.ordinal
-        val mondayOfCurrentWeek = selectedDate.minus(currentDayOfWeekOrdinal, DateTimeUnit.DAY)
-        List(7) { i -> mondayOfCurrentWeek.plus(i, DateTimeUnit.DAY) }
-    }
-
-    // Запрос данных через доменный Use Case
-    val habitsAggregateList = remember(selectedDate, stateUpdateTrigger) {
+    // Получение списка привычек через новую доменную функцию
+    val habitsList = remember(selectedDate, stateUpdateTrigger) {
         getHabitFactsForDate(
             date = selectedDate,
             today = today,
@@ -61,19 +57,19 @@ fun HabitDayScreen(
 
     Scaffold(
         containerColor = bgLightBlue,
+        // Правая нижняя плавающая кнопка "+"
         floatingActionButton = {
             FloatingActionButton(
                 onClick = onAddHabitClick,
                 containerColor = brandBlue,
                 contentColor = Color.White,
                 shape = CircleShape,
-                modifier = Modifier
-                    .size(56.dp)
-                    .padding(bottom = 16.dp, end = 8.dp)
+                modifier = Modifier.size(56.dp).padding(bottom = 16.dp, end = 8.dp)
             ) {
                 Icon(Icons.Default.Add, contentDescription = "Добавить", modifier = Modifier.size(28.dp))
             }
         },
+        // Нижнее меню навигации (Bottom Navigation Bar)
         bottomBar = {
             NavigationBar(
                 containerColor = Color.White,
@@ -111,163 +107,138 @@ fun HabitDayScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .padding(horizontal = 24.dp)
+                .padding(horizontal = 20.dp)
         ) {
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
-            // 1. Верхний блок: Приветствие, Время и Аватар
+            // 1. Верхний блок: Профиль пользователя и Дата
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Column {
-                    Text(text = "Алина, доброе утро!", fontSize = 13.sp, color = textGray)
-                    Text(text = headerDateString, fontSize = 22.sp, fontWeight = FontWeight.Bold, color = textDark)
+                    Text(text = "Алина, доброе утро!", fontSize = 14.sp, color = textGray)
+                    Text(text = headerDateString, fontSize = 20.sp, fontWeight = FontWeight.Bold, color = textDark)
                 }
-                // Круглая аватарка из макета
+                // Имитация круглой аватарки
                 Box(
                     modifier = Modifier
-                        .size(44.dp)
-                        .background(Color(0xFFE2E8F0), shape = CircleShape),
+                        .size(42.dp)
+                        .background(Color(0xFFDCDCE2), shape = CircleShape),
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(Icons.Default.Person, contentDescription = null, tint = textGray)
                 }
             }
 
+            Spacer(modifier = Modifier.height(20.dp))
+
+            // 2. Горизонтальный календарь на неделю (Вынесенный вами компонент)
+            HabitWeekCalendar(
+                selectedDate = selectedDate,
+                today = today,
+                onDateSelected = { newDate ->
+                    selectedDate = newDate
+                }
+            )
+
             Spacer(modifier = Modifier.height(24.dp))
 
-            // 2. Горизонтальный календарь (Week Bar) ровно по Figma
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                weekDays.forEach { date ->
-                    val isSelected = date == selectedDate
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.spacedBy(8.dp),
-                        modifier = Modifier.clickable { selectedDate = date }
-                    ) {
-                        Text(
-                            text = date.dayOfWeek.toAbbr(),
-                            fontSize = 12.sp,
-                            color = textGray,
-                            fontWeight = FontWeight.Medium
-                        )
-                        Box(
-                            modifier = Modifier
-                                .size(36.dp)
-                                .background(
-                                    color = if (isSelected) brandBlue else Color.White,
-                                    shape = CircleShape
-                                )
-                                .border(
-                                    width = if (isSelected) 0.dp else 1.dp,
-                                    color = if (isSelected) Color.Transparent else borderGray,
-                                    shape = CircleShape
-                                ),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(
-                                text = date.dayOfMonth.toString(),
-                                fontSize = 14.sp,
-                                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
-                                color = if (isSelected) Color.White else textDark
-                            )
-                        }
-                    }
-                }
-            }
-
-            Spacer(modifier = Modifier.height(28.dp))
-
-            // 3. Список привычек дня
+            // 3. Список привычек дня на базе HabitFactAggregate
             LazyColumn(
-                verticalArrangement = Arrangement.spacedBy(14.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp),
                 modifier = Modifier.fillMaxWidth()
             ) {
-                items(habitsAggregateList) { aggregate ->
-                    // Временный маппинг флага выполнения.
-                    // Замените на реальное поле из вашего HabitFact / HabitFactAggregate
-                    val isCompleted = false
-
-                    Card(
+                items(habitsList) { aggregate ->
+                    Box(
                         modifier = Modifier
                             .fillMaxWidth()
                             .clickable {
-                                // Тоггл состояния привычки через репозиторий/интерактор
+                                // TODO: Реализовать логику клика/переключения статуса через Use Case.
+                                // Будет сделано на следующем шаге после анализа полей доменной модели.
                                 ++stateUpdateTrigger
-                            },
-                        shape = RoundedCornerShape(16.dp),
-                        colors = CardDefaults.cardColors(containerColor = Color.White),
-                        elevation = CardDefaults.cardElevation(defaultElevation = 0.5.dp)
+                            }
                     ) {
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(16.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            // Цветная круглая иконка привычки слева
-                            Box(
-                                modifier = Modifier
-                                    .size(40.dp)
-                                    .background(
-                                        color = brandBlue.copy(alpha = 0.15f), // В Figma цвет зависит от категории
-                                        shape = CircleShape
-                                    ),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.DirectionsRun, // Замените динамически на иконку привычки
-                                    contentDescription = null,
-                                    tint = brandBlue,modifier = Modifier.size(22.dp)
-                                )
-                            }
-
-                            Spacer(modifier = Modifier.width(16.dp))// Текстовый блок (Название + Серия дней)
-
-                            Column(modifier = Modifier.weight(1f)) {
-                                Text(
-                                    text = aggregate.habit.name,
-                                    fontSize = 16.sp,
-                                    fontWeight = FontWeight.SemiBold,
-                                    color = textDark
-                                )
-
-                                Spacer(modifier = Modifier.height(2.dp))
-
-                            }
-
-
-
-                            // Отображение счетчика дней подряд (например, "🔥 5 дней")
-
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                Text(text = "🔥 5 дней", // Замените на динамические данные из вашей модели aggregate/fact
-                                    fontSize = 12.sp,
-                                    color = textGray
-                                )
-                            }
-                        }
-                        // Круглый чекбокс справа ровно как на макете
-                        Icon(
-                            imageVector = if (isCompleted) Icons.Default.CheckCircle else Icons.Default.RadioButtonUnchecked,
-                            contentDescription = "Статус выполнения",
-                            tint = if (isCompleted) brandBlue else borderGray,modifier = Modifier.size(28.dp)
-                        )
+                        HabitCard(aggregate = aggregate)
                     }
                 }
             }
         }
     }
 }
+
+// Компонент карточки привычки, адаптированный под HabitFactAggregate и макет Figma
+@Composable
+fun HabitCard(aggregate: HabitFactAggregate) {
+    val textDark = Color(0xFF1A1A1A)
+    val textGray = Color(0xFF8A8A8E)
+    val brandBlue = Color(0xFF3B638A)
+    val borderGray = Color(0xFFE5E5EA)
+
+    // Временные заглушки для полей.
+    // Замените на реальные свойства из ваших моделей Habit/HabitFact на следующем шаге.
+    val habitName = "Привычка" // Пример: aggregate.habit.name
+    val isCompleted = false   // Пример: aggregate.fact.isCompleted
+    val streakText = "🔥 0 дней" // Пример: "🔥 ${aggregate.streak} дней"
+
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(18.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(14.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.weight(1f)
+            ) {
+                // Круглая цветная иконка привычки слева по макету
+                Box(
+                    modifier = Modifier
+                        .size(40.dp)
+                        .background(brandBlue.copy(alpha = 0.12f), shape = CircleShape),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.DirectionsRun,
+                        contentDescription = null,
+                        tint = brandBlue,
+                        modifier = Modifier.size(22.dp)
+                    )
+                }
+
+                Spacer(modifier = Modifier.width(14.dp))
+
+                // Текстовая информация
+                Column {
+                    Text(
+                        text = habitName,
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        color = textDark
+                    )
+                    Spacer(modifier = Modifier.height(2.dp))
+                    Text(
+                        text = streakText,
+                        fontSize = 12.sp,
+                        color = textGray
+                    )
+                }
+            }
+
+            // Круглый чекбокс состояния выполнения справа по макету
+            Icon(
+                imageVector = if (isCompleted) Icons.Default.CheckCircle else Icons.Default.RadioButtonUnchecked,
+                contentDescription = "Статус",
+                tint = if (isCompleted) brandBlue else borderGray,modifier = Modifier.size(28.dp)
+            )
+        }
+    }
 }
-
-// Функции перевода дат остаются без изменений
-
-fun DayOfWeek.toRu(): String = when(this) {DayOfWeek.MONDAY -> "Понедельник"DayOfWeek.TUESDAY -> "Вторник"DayOfWeek.WEDNESDAY -> "Среда"DayOfWeek.THURSDAY -> "Четверг"DayOfWeek.FRIDAY -> "Пятница"DayOfWeek.SATURDAY -> "Суббота"DayOfWeek.SUNDAY -> "Воскресенье"else -> this.name}fun DayOfWeek.toAbbr(): String = when(this) {DayOfWeek.MONDAY -> "Пн"DayOfWeek.TUESDAY -> "Вт"DayOfWeek.WEDNESDAY -> "Ср"DayOfWeek.THURSDAY -> "Чт"DayOfWeek.FRIDAY -> "Пт"DayOfWeek.SATURDAY -> "Сб"DayOfWeek.SUNDAY -> "Вс"else -> this.name}fun Month.toRu(): String = when(this) {Month.JANUARY -> "января"Month.FEBRUARY -> "февраля"Month.MARCH -> "марта"Month.APRIL -> "апреля"Month.MAY -> "мая"Month.JUNE -> "июня"Month.JULY -> "июля"Month.AUGUST -> "августа"Month.SEPTEMBER -> "сентября"Month.OCTOBER -> "октября"Month.NOVEMBER -> "ноября"Month.DECEMBER -> "декабря"else -> this.name}
-
-

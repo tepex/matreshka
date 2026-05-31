@@ -33,7 +33,7 @@ fun HabitWeekCalendar(
         val mondayOfCurrentWeek = today.minus(currentDayOfWeekOrdinal, DateTimeUnit.DAY)
         List(7) { i -> mondayOfCurrentWeek.plus(i, DateTimeUnit.DAY) }
     }
-    
+
     Row(
         modifier = Modifier
             .fillMaxWidth()

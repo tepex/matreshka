@@ -46,6 +46,7 @@ fun HabitDayScreen(
     val today = remember { Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date }
     var selectedDate by remember { mutableStateOf(today) }
     var stateUpdateTrigger by remember { mutableStateOf(0) }
+    val isClickableDate = selectedDate == today
 
     // Текст заголовка (например, "Четверг, 2 апреля") сформирован с помощью ваших новых мапперов
     val headerDateString = "${selectedDate.dayOfWeek.toRu()}, ${selectedDate.dayOfMonth} ${selectedDate.month.toRu()}"
@@ -163,7 +164,12 @@ fun HabitDayScreen(
                 modifier = Modifier.fillMaxWidth()
             ) {
                 items(habitsList) { habitItem ->
-                    HabitCard(habitItem, onHabitClick)
+                    HabitCard(
+                        habitItem = habitItem,
+                        isCheckboxEnabled = isClickableDate,
+                        onHabitClick = { onHabitClick(habitItem.id) },
+                        onCheckedChange = {} // выше
+                    )
                 }
             }
         }
@@ -174,12 +180,14 @@ fun HabitDayScreen(
 @Composable
 fun HabitCard(
     habitItem: HabitItem,
-    onHabitClick: (Int) -> Unit = {}
+    isCheckboxEnabled: Boolean,
+    onHabitClick: () -> Unit = {},
+    onCheckedChange: () -> Unit
 ) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { onHabitClick(habitItem.id) },
+            .clickable { onHabitClick() },
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.5.dp)
@@ -227,11 +235,9 @@ fun HabitCard(
 
             // Круглая кнопка-чекбокс отметки выполнения
             IconButton(
-                onClick = {
-                    // TODO: Инвертировать статус факта выполнения через интерактор
-                    ++stateUpdateTrigger
-                },
-                modifier = Modifier.size(28.dp)
+                modifier = Modifier.size(28.dp),
+                onClick = { if (isCheckboxEnabled) onCheckedChange() },
+                enabled = isCheckboxEnabled
             ) {
                 Icon(
                     imageVector = if (habitItem.isCompleted) Icons.Default.CheckCircle else Icons.Default.RadioButtonUnchecked,

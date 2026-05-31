@@ -12,6 +12,12 @@ data class HabitFact private constructor(
     val isCompleted: Boolean = false
 ) {
 
+    fun switchCompletion(): HabitFact =
+        HabitFact(habitId, isCompleted.not())
+
+    fun setCompletion(isCompleted: Boolean): HabitFact =
+        HabitFact(habitId, isCompleted)
+
     companion object {
         fun create(habitId: Habit.Id): HabitFact =
             HabitFact(habitId)

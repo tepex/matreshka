@@ -2,10 +2,12 @@ package com.habitloop.app.habit.data
 
 import com.habitloop.app.habit.domain.model.Habit
 import com.habitloop.app.habit.domain.HabitRepository
+import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.LocalDate
 
 class HabitRepositoryImpl(private val storage: HabitStorage) : HabitRepository {
 
+    /*
     override fun getHabits(): List<Habit> =
         //storage.getRawHabits().ifEmpty { defaultHabits }
         storage.getRawHabits()
@@ -45,5 +47,9 @@ class HabitRepositoryImpl(private val storage: HabitStorage) : HabitRepository {
         currentHistory[historyKey] = !currentStatus
 
         storage.saveHistoryMap(currentHistory)
+    }*/
+
+    override fun getHabitsByDayOfWeek(day: DayOfWeek): Set<Habit> {
+        return emptySet()
     }
 }

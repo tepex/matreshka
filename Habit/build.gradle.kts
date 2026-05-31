@@ -78,3 +78,7 @@ kotlin {
         }
     }
 }
+
+tasks.withType<Test>().configureEach {
+    useJUnitPlatform() // Включает поддержку Kotest на уровне движка Gradle
+}

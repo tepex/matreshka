@@ -18,6 +18,7 @@ import kotlinx.datetime.*
 @Composable
 fun HabitWeekCalendar(
     selectedDate: LocalDate,
+    today: LocalDate = remember { Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date },
     onDateSelected: (LocalDate) -> Unit
 ) {
     // Палитра цветов строго по Figma макету
@@ -27,13 +28,12 @@ fun HabitWeekCalendar(
     val borderGray = Color(0xFFE5E5EA) // Светлая подложка-ободок для неактивных дней
 
     // Вычисляем список дней для текущей недели на основе выбранной даты
-    val weekDays = remember(selectedDate) {
-        val currentDayOfWeekOrdinal = selectedDate.dayOfWeek.ordinal // 0 (Пн) .. 6 (Вс)
-        val mondayOfCurrentWeek = selectedDate.minus(currentDayOfWeekOrdinal, DateTimeUnit.DAY)
-
+    val weekDays = remember(today) {
+        val currentDayOfWeekOrdinal = today.dayOfWeek.ordinal
+        val mondayOfCurrentWeek = today.minus(currentDayOfWeekOrdinal, DateTimeUnit.DAY)
         List(7) { i -> mondayOfCurrentWeek.plus(i, DateTimeUnit.DAY) }
     }
-
+    
     Row(
         modifier = Modifier
             .fillMaxWidth()

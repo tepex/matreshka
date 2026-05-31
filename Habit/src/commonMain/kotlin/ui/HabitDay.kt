@@ -23,10 +23,16 @@ import com.habitloop.app.habit.domain.HabitFactRepository
 import com.habitloop.app.habit.domain.HabitRepository
 import com.habitloop.app.habit.domain.getHabitFactsForDate
 import com.habitloop.app.habit.domain.model.HabitFactAggregate
+import com.habitloop.app.habit.ui.model.HabitItem
 import com.habitloop.app.habit.ui.model.toHabitItem
 import com.habitloop.app.habit.ui.model.toRu
 import kotlinx.datetime.*
 import org.jetbrains.compose.ui.tooling.preview.Preview
+
+val bgLightBlue = Color(0xFFF4F7FA)
+val textDark = Color(0xFF1A1A1A)
+val textGray = Color(0xFF8A8A8E)
+val brandBlue = Color(0xFF3B638A)
 
 @Composable
 fun HabitDayScreen(
@@ -36,11 +42,6 @@ fun HabitDayScreen(
     onHabitClick: (Int) -> Unit = {},
     onTabClick: (AppScreen) -> Unit = {}
 ) {
-    // Палитра цветов по макету Figma
-    val bgLightBlue = Color(0xFFF4F7FA)
-    val textDark = Color(0xFF1A1A1A)
-    val textGray = Color(0xFF8A8A8E)
-    val brandBlue = Color(0xFF3B638A)
 
     val today = remember { Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date }
     var selectedDate by remember { mutableStateOf(today) }
@@ -162,149 +163,83 @@ fun HabitDayScreen(
                 modifier = Modifier.fillMaxWidth()
             ) {
                 items(habitsList) { habitItem ->
-                    Card(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clickable { onHabitClick(habitItem.id) },
-                        shape = RoundedCornerShape(16.dp),
-                        colors = CardDefaults.cardColors(containerColor = Color.White),
-                        elevation = CardDefaults.cardElevation(defaultElevation = 0.5.dp)
-                    ) {
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(16.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            // Цветной круг с иконкой привычки слева
-                            Box(
-                                modifier = Modifier
-                                    .size(40.dp)
-                                    .background(brandBlue.copy(alpha = 0.12f), shape = CircleShape),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.DirectionsRun, // Добавить динамическую подгрузку иконок позже
-                                    contentDescription = null,
-                                    tint = brandBlue,
-                                    modifier = Modifier.size(22.dp)
-                                )
-                            }
-
-                            Spacer(modifier = Modifier.width(16.dp))
-
-                            // Текстовая секция: Название привычки и серия дней
-                            Column(modifier = Modifier.weight(1f)) {
-                                Text(
-                                    text = habitItem.name,
-                                    fontSize = 16.sp,
-                                    fontWeight = FontWeight.SemiBold,
-                                    color = textDark
-                                )
-                                Spacer(modifier = Modifier.height(2.dp))
-                                Text(
-                                    text = "x days", // TODO: доделать
-                                    // Динамически собираем текст серии с правильным склонением слова "день"
-                                    // text = "🔥 ${habitItem.streak} ${getDaysWord(habitItem.streak)}",
-                                    fontSize = 13.sp,
-                                    color = textGray
-                                )
-                            }
-
-                            // Круглая кнопка-чекбокс отметки выполнения
-                            IconButton(
-                                onClick = {
-                                    // TODO: Инвертировать статус факта выполнения через интерактор
-                                    ++stateUpdateTrigger
-                                },
-                                modifier = Modifier.size(28.dp)
-                            ) {
-                                Icon(
-                                    imageVector = if (habitItem.isCompleted) Icons.Default.CheckCircle else Icons.Default.RadioButtonUnchecked,
-                                    contentDescription = "Отметить выполнение",
-                                    tint = if (habitItem.isCompleted) brandBlue else Color(0xFFBCC2CD),
-                                    modifier = Modifier.size(28.dp)
-                                )
-                            }
-                        }
-                    }
+                    HabitCard(habitItem, onHabitClick)
                 }
             }
         }
     }
 }
 
-// Компонент карточки привычки, адаптированный под HabitFactAggregate и макет Figma
+// Компонент карточки привычки, адаптированный под HabitFactAggregate
 @Composable
-fun HabitCard(aggregate: HabitFactAggregate) {
-    val textDark = Color(0xFF1A1A1A)
-    val textGray = Color(0xFF8A8A8E)
-    val brandBlue = Color(0xFF3B638A)
-    val borderGray = Color(0xFFE5E5EA)
-
-    // Временные заглушки для полей.
-    // Замените на реальные свойства из ваших моделей Habit/HabitFact на следующем шаге.
-    val habitName = "Привычка" // Пример: aggregate.habit.name
-    val isCompleted = false   // Пример: aggregate.fact.isCompleted
-    val streakText = "🔥 0 дней" // Пример: "🔥 ${aggregate.streak} дней"
-
+fun HabitCard(
+    habitItem: HabitItem,
+    onHabitClick: (Int) -> Unit = {}
+) {
     Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(18.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onHabitClick(habitItem.id) },
+        shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White),
-        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.5.dp)
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(14.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
+                .padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.weight(1f)
+            // Цветной круг с иконкой привычки слева
+            Box(
+                modifier = Modifier
+                    .size(40.dp)
+                    .background(brandBlue.copy(alpha = 0.12f), shape = CircleShape),
+                contentAlignment = Alignment.Center
             ) {
-                // Круглая цветная иконка привычки слева по макету
-                Box(
-                    modifier = Modifier
-                        .size(40.dp)
-                        .background(brandBlue.copy(alpha = 0.12f), shape = CircleShape),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.DirectionsRun,
-                        contentDescription = null,
-                        tint = brandBlue,
-                        modifier = Modifier.size(22.dp)
-                    )
-                }
-
-                Spacer(modifier = Modifier.width(14.dp))
-
-                // Текстовая информация
-                Column {
-                    Text(
-                        text = habitName,
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.SemiBold,
-                        color = textDark
-                    )
-                    Spacer(modifier = Modifier.height(2.dp))
-                    Text(
-                        text = streakText,
-                        fontSize = 12.sp,
-                        color = textGray
-                    )
-                }
+                Icon(
+                    imageVector = habitItem.icon,
+                    contentDescription = null,
+                    tint = habitItem.iconBgColor,
+                    modifier = Modifier.size(22.dp)
+                )
             }
 
-            // Круглый чекбокс состояния выполнения справа по макету
-            Icon(
-                imageVector = if (isCompleted) Icons.Default.CheckCircle else Icons.Default.RadioButtonUnchecked,
-                contentDescription = "Статус",
-                tint = if (isCompleted) brandBlue else borderGray,modifier = Modifier.size(28.dp)
-            )
+            Spacer(modifier = Modifier.width(16.dp))
+
+            // Текстовая секция: Название привычки и серия дней
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = habitItem.name,
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    color = textDark
+                )
+                Spacer(modifier = Modifier.height(2.dp))
+                Text(
+                    text = "x days", // TODO: доделать
+                    // Динамически собираем текст серии с правильным склонением слова "день"
+                    // text = "🔥 ${habitItem.streak} ${getDaysWord(habitItem.streak)}",
+                    fontSize = 13.sp,
+                    color = textGray
+                )
+            }
+
+            // Круглая кнопка-чекбокс отметки выполнения
+            IconButton(
+                onClick = {
+                    // TODO: Инвертировать статус факта выполнения через интерактор
+                    ++stateUpdateTrigger
+                },
+                modifier = Modifier.size(28.dp)
+            ) {
+                Icon(
+                    imageVector = if (habitItem.isCompleted) Icons.Default.CheckCircle else Icons.Default.RadioButtonUnchecked,
+                    contentDescription = "Отметить выполнение",
+                    tint = if (habitItem.isCompleted) brandBlue else Color(0xFFBCC2CD),
+                    modifier = Modifier.size(28.dp)
+                )
+            }
         }
     }
 }

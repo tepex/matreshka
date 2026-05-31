@@ -5,7 +5,7 @@ import com.habitloop.app.habit.domain.HabitRepository
 import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.LocalDate
 
-class HabitRepositoryImpl(private val storage: HabitStorage) : HabitRepository {
+class HabitRepositoryImpl(/*private val storage: HabitStorage*/) : HabitRepository {
 
     /*
     override fun getHabits(): List<Habit> =

@@ -42,8 +42,8 @@ class HabitStorage {
 
     fun getRawHabits(): List<Habit> {
         val jsonString = settings?.getString(KEY_HABITS, "") ?: ""
-        //if (jsonString.isEmpty()) return emptyList()
-        if (jsonString.isEmpty()) return defaultHabits
+        if (jsonString.isEmpty()) return emptyList()
+        //if (jsonString.isEmpty()) return defaultHabits
         return json.decodeFromString<List<Habit>>(jsonString)
     }
 

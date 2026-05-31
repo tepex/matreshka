@@ -178,7 +178,10 @@ fun NewHabitScreen(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Habit.Type.entries.forEachIndexed { i, type ->
+
+                /*
+
+                Habit.Data.Type.entries.forEachIndexed { i, type ->
                     val isSelected = i == selectedIconIndex
                     Box(
                         modifier = Modifier
@@ -206,13 +209,20 @@ fun NewHabitScreen(
                         }
                     }
                 }
+
+                */
+
             }
 
             Spacer(modifier = Modifier.height(24.dp))
 
             // 3. Селектор Цвета
             Text(text = "Цвет акцента", fontSize = 14.sp, color = textGray, fontWeight = FontWeight.Medium)
+
             Spacer(modifier = Modifier.height(12.dp))
+
+            /*
+
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
@@ -246,7 +256,7 @@ fun NewHabitScreen(
                         }
                     }
                 }
-            }
+            }*/
 
             Spacer(modifier = Modifier.height(28.dp))
 

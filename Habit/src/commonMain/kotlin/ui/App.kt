@@ -2,6 +2,7 @@ package com.habitloop.app.habit.ui
 
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.*
+import com.habitloop.app.habit.DI
 import kotlinx.coroutines.delay
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
@@ -11,6 +12,7 @@ enum class AppScreen {
 
 @Composable
 fun App() {
+    val di = remember { DI() }
     val settings = remember { com.russhwolf.settings.Settings() }
     var currentScreen by remember { mutableStateOf(AppScreen.SPLASH) }
 
@@ -24,6 +26,7 @@ fun App() {
     }
 
     AppContent(
+        di,
         currentScreen = currentScreen,
         onScreenChange = { nextScreen -> currentScreen = nextScreen }
     )
@@ -31,6 +34,7 @@ fun App() {
 
 @Composable
 fun AppContent(
+    di: DI,
     currentScreen: AppScreen,
     onScreenChange: (AppScreen) -> Unit
 ) {
@@ -58,6 +62,8 @@ fun AppContent(
             )
 
             AppScreen.HABIT_DAY -> HabitDayScreen(
+                di.habitRepository,
+                di.habitFactRepository,
                 onAddHabitClick = { onScreenChange(AppScreen.NEW_HABIT) },
                 onHabitClick = { onScreenChange(AppScreen.HABIT_DETAILS) },
                 onTabClick = { tabScreen -> onScreenChange(tabScreen) }
@@ -86,6 +92,7 @@ fun AppContent(
 @Composable
 fun AppPreview() {
     AppContent(
+        DI(),
         currentScreen = AppScreen.WELCOME1,
         onScreenChange = {}
     )

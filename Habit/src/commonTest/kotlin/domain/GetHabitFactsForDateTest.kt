@@ -119,5 +119,16 @@ private class FakeHabitFactRepository(private val stubFacts: List<HabitFact>) : 
     override fun getHabitFacts(day: LocalDate): List<HabitFact> {
         return stubFacts
     }
+
+    override fun add(
+        day: LocalDate,
+        fact: HabitFact
+    ): Result<HabitFact> {
+        TODO("Not yet implemented")
+    }
+
+    override fun update(day: LocalDate, i: Int, isCompleted: Boolean): Result<HabitFact> {
+        TODO("Not yet implemented")
+    }
 }
 

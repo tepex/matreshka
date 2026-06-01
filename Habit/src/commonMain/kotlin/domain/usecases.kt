@@ -32,12 +32,18 @@ fun getHabitFactsForDate(
                     .run {
                         takeIf { date == today }?.let { originFacts ->
                             originFacts.takeIf { it.size < habits.size }?.let {
+
                                 originFacts.mapTo(HashSet(originFacts.size)) { it.fact.habitId }
                                     .let { processedIds ->
                                         buildList(habits.size) {
                                             addAll(originFacts)
                                             for (habit in habits) {
-                                                if (habit.id !in processedIds) add(HabitFactAggregate.create(habit))
+                                                if (habit.id !in processedIds) {
+                                                    HabitFactAggregate.create(habit).also {
+                                                        habitFactRepository.add(today, it.fact)
+                                                        add(it)
+                                                    }
+                                                }
                                             }
                                         }
                                     }
@@ -46,4 +52,14 @@ fun getHabitFactsForDate(
                     }
             } ?: habits.map { HabitFactAggregate.create(habit = it) }
         }
+    }.also {
+        println("[usecase] facts for $date: ${habitFactRepository.getHabitFacts(date)}")
     }
+
+fun switchHabitFactForDate(
+    date: LocalDate,
+    i: Int,
+    habitFactRepository: HabitFactRepository
+) {
+    //habitFactRepository.update(date, i, )
+}

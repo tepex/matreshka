@@ -4,8 +4,23 @@ import com.habitloop.app.habit.domain.model.Habit
 import com.habitloop.app.habit.domain.HabitRepository
 import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.LocalDate
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 
 class HabitRepositoryImpl(/*private val storage: HabitStorage*/) : HabitRepository {
+
+    // json: List<>
+    private var storage = ""
+    private val json = Json {
+        ignoreUnknownKeys = true
+        coerceInputValues = true
+    }
+
+    init {
+        val jsonString = json.encodeToString(predefinedHabits)
+        storage = jsonString
+        println("[HabitRepository] Init: $storage")
+    }
 
     /*
     override fun getHabits(): List<Habit> =
@@ -49,11 +64,16 @@ class HabitRepositoryImpl(/*private val storage: HabitStorage*/) : HabitReposito
         storage.saveHistoryMap(currentHistory)
     }*/
 
-    override fun getHabitsByDayOfWeek(day: DayOfWeek): Set<Habit> {
-        //return emptySet()
-        return setOf(
-            Habit.create("test", Habit.Data.IconType.ICON1, Habit.Data.ColorType.COLOR1, 6),
-            Habit.create("test 3", Habit.Data.IconType.ICON3, Habit.Data.ColorType.COLOR3, 6)
-        )
-    }
+    override fun getHabitsByDayOfWeek(day: DayOfWeek): Set<Habit> =
+        storage.takeIf { it.isNotBlank() }?.let { json.decodeFromString<Set<Habit>>(it) }
+            ?.also { println("[HabitRepository] get($day): $it") }
+            ?: emptySet()
 }
+
+val predefinedHabits = setOf(
+    Habit.create("test", Habit.Data.IconType.ICON1, Habit.Data.ColorType.COLOR1, setOf(6)),
+    Habit.create("test 3", Habit.Data.IconType.ICON3, Habit.Data.ColorType.COLOR3, setOf(6)),
+
+    Habit.create("every day 1", Habit.Data.IconType.ICON4, Habit.Data.ColorType.COLOR4, setOf(0,1,2,3,4,5,6)),
+    Habit.create("every day 2", Habit.Data.IconType.ICON5, Habit.Data.ColorType.COLOR5, setOf(0,1,2,3,4,5,6))
+)

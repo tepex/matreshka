@@ -14,6 +14,9 @@ class Habit(
     var data: Data
 ) {
 
+    override fun toString(): String =
+        "[id: $id, data: $data]"
+
     @JvmInline
     @Serializable
     value class Id(val value: Int = HabitIdGenerator.nextId()) {
@@ -66,6 +69,10 @@ class Habit(
             override fun hashCode(): Int {
                 return this.value.contentHashCode()
             }
+
+            override fun toString(): String =
+                value.joinToString(prefix = "[", postfix = "]")
+
         }
 
     }
@@ -85,13 +92,13 @@ class Habit(
             name: String,
             icon: Data.IconType,
             color: Data.ColorType,
-            dayOfWeek: Int,
+            weekIndicies: Set<Int>,
         ): Habit =
             Data(
                 Data.Name(name),
                 icon,
                 color,
-                Data.Weekly(BooleanArray(7).also { it[dayOfWeek] = true }),
+                Data.Weekly(BooleanArray(7) { i -> i in weekIndicies }),
                 false
             ).let { Habit(Habit.Id(), it) }
     }

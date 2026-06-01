@@ -69,18 +69,23 @@ class HabitRepositoryImpl(/*private val storage: HabitStorage*/) : HabitReposito
             .let { set ->
                 set += habit
                 storage = json.encodeToString(set)
+                println("[HabitRepository] added new habit $habit")
+                println("[HabitRepository] saved habits:")
+                println(storage)
                 Result.success(habit)
             }
 
     override fun getHabitsByDayOfWeek(day: DayOfWeek): Set<Habit> =
         storage.takeIf { it.isNotBlank() }?.let { json.decodeFromString<Set<Habit>>(it) }
+            ?.filter { it.data.weekly.value[day.ordinal] }
+            ?.toSet()
             ?.also { println("[HabitRepository] get($day): $it") }
             ?: emptySet()
 }
 
 val predefinedHabits = setOf(
-    Habit.create("test", Habit.Data.IconType.ICON1, Habit.Data.ColorType.COLOR1, setOf(6)),
-    Habit.create("test 3", Habit.Data.IconType.ICON3, Habit.Data.ColorType.COLOR3, setOf(6)),
+    Habit.create("test", Habit.Data.IconType.ICON1, Habit.Data.ColorType.COLOR1, setOf(1,6)),
+    Habit.create("test 3", Habit.Data.IconType.ICON3, Habit.Data.ColorType.COLOR3, setOf(2,6)),
 
     Habit.create("every day 1", Habit.Data.IconType.ICON4, Habit.Data.ColorType.COLOR4, setOf(0,1,2,3,4,5,6)),
     Habit.create("every day 2", Habit.Data.IconType.ICON5, Habit.Data.ColorType.COLOR5, setOf(0,1,2,3,4,5,6))

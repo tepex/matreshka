@@ -76,6 +76,7 @@ fun AppContent(
                         habit = newHabit,
                         habitRepository = di.habitRepository
                     )
+                    onScreenChange(AppScreen.HABIT_DAY)
                 }
             )
             AppScreen.HABIT_DETAILS -> HabitDetailsScreen(

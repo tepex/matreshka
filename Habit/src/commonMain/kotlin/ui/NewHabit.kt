@@ -77,7 +77,7 @@ fun NewHabitScreen(
     // Стейты времени напоминания и выбранных дней (1 = Пн, 7 = Вс)
     var selectedHour by remember { mutableStateOf("09") }
     var selectedMinute by remember { mutableStateOf("00") }
-    val selectedDays = remember { mutableStateListOf<Int>() }
+    val selectedDays = remember { mutableStateListOf(0, 1, 2, 3, 4, 5, 6) }
 
     // Контроль открытия выпадающих списков времени
     var isHourMenuExpanded by remember { mutableStateOf(false) }

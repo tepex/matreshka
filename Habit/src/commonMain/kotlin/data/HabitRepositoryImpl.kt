@@ -1,15 +1,14 @@
 package com.habitloop.app.habit.data
 
-import com.habitloop.app.habit.domain.model.Habit
 import com.habitloop.app.habit.domain.HabitRepository
+import com.habitloop.app.habit.domain.model.Habit
 import kotlinx.datetime.DayOfWeek
-import kotlinx.datetime.LocalDate
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 
 class HabitRepositoryImpl(/*private val storage: HabitStorage*/) : HabitRepository {
 
-    // json: List<>
+    // json: Set<Habit>
     private var storage = ""
     private val json = Json {
         ignoreUnknownKeys = true
@@ -63,6 +62,15 @@ class HabitRepositoryImpl(/*private val storage: HabitStorage*/) : HabitReposito
 
         storage.saveHistoryMap(currentHistory)
     }*/
+
+    override fun create(habit: Habit): Result<Habit> =
+        (storage.takeIf { it.isNotBlank() }
+            ?.let { json.decodeFromString<Set<Habit>>(it).toMutableSet() } ?: mutableSetOf())
+            .let { set ->
+                set += habit
+                storage = json.encodeToString(set)
+                Result.success(habit)
+            }
 
     override fun getHabitsByDayOfWeek(day: DayOfWeek): Set<Habit> =
         storage.takeIf { it.isNotBlank() }?.let { json.decodeFromString<Set<Habit>>(it) }

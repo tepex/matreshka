@@ -3,6 +3,7 @@ package com.habitloop.app.habit.ui
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.*
 import com.habitloop.app.habit.DI
+import com.habitloop.app.habit.domain.createNewHabit
 import kotlinx.coroutines.delay
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
@@ -70,7 +71,12 @@ fun AppContent(
             )
             AppScreen.NEW_HABIT -> NewHabitScreen(
                 onBackClick = { onScreenChange(AppScreen.HABIT_DAY) },
-                //onSaveClick = { onScreenChange(AppScreen.HABIT_DAY) }
+                onSaveClick = { newHabit ->
+                    createNewHabit(
+                        habit = newHabit,
+                        habitRepository = di.habitRepository
+                    )
+                }
             )
             AppScreen.HABIT_DETAILS -> HabitDetailsScreen(
                 onBackClick = { onScreenChange(AppScreen.HABIT_DAY) },

@@ -65,3 +65,16 @@ fun switchHabitFactForDate(
     habitFactRepository.update(date, i, newState)
 
 }
+
+/**
+ * Use Case (Интерактор) для создания и сохранения новой привычки
+ */
+fun createNewHabit(
+    habit: Habit,
+    habitRepository: HabitRepository
+) {
+    // Здесь при необходимости может быть дополнительная бизнес-логика
+    // (например, проверка на дубликаты имен, валидация лимитов привычек и т.д.)
+
+    habitRepository.create(habit)
+}

@@ -113,6 +113,10 @@ private class FakeHabitRepository(private val stubHabits: Set<Habit>) : HabitRep
         // Для простоты тестов возвращаем фиксированный набор независимо от дня недели
         return stubHabits
     }
+
+    override fun create(habit: Habit): Result<Habit> {
+        TODO("Not yet implemented")
+    }
 }
 
 private class FakeHabitFactRepository(private val stubFacts: List<HabitFact>) : HabitFactRepository {

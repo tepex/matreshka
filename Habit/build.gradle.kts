@@ -28,15 +28,17 @@ kotlin {
             export(project(":Opt"))
         }
     }
-    
+
     android {
-       namespace = "com.habitloop.app.shared.habit"
-       compileSdk = libs.versions.android.compileSdk.get().toInt()
-       minSdk = libs.versions.android.minSdk.get().toInt()
-    
-       compilerOptions {
-           jvmTarget = JvmTarget.JVM_11
-       }
+        namespace = "com.habitloop.app.shared.habit"
+        compileSdk = libs.versions.android.compileSdk.get().toInt()
+        minSdk = libs.versions.android.minSdk.get().toInt()
+
+        compilerOptions {
+            jvmTarget = JvmTarget.JVM_17
+        }
+
+        withHostTest {}
     }
     
     sourceSets {
@@ -55,6 +57,7 @@ kotlin {
             implementation(compose.materialIconsExtended)
             implementation(libs.multiplatform.settings)
             implementation(libs.kotlinx.serialization.json)
+            implementation(libs.kotlinx.datetime)
 
             implementation(compose.components.uiToolingPreview)
 
@@ -63,6 +66,19 @@ kotlin {
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
+            implementation(libs.kotest.engine)
+            implementation(libs.kotest.assertions)
+            //implementation(libs.kotest.datatest)
+        }
+
+        val androidHostTest by getting {
+            dependencies {
+                implementation(libs.kotest)
+            }
         }
     }
+}
+
+tasks.withType<Test>().configureEach {
+    useJUnitPlatform() // Включает поддержку Kotest на уровне движка Gradle
 }

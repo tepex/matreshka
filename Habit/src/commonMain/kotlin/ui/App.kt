@@ -2,6 +2,8 @@ package com.habitloop.app.habit.ui
 
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.*
+import com.habitloop.app.habit.DI
+import com.habitloop.app.habit.domain.createNewHabit
 import kotlinx.coroutines.delay
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
@@ -11,6 +13,7 @@ enum class AppScreen {
 
 @Composable
 fun App() {
+    val di = remember { DI() }
     val settings = remember { com.russhwolf.settings.Settings() }
     var currentScreen by remember { mutableStateOf(AppScreen.SPLASH) }
 
@@ -19,12 +22,12 @@ fun App() {
             delay(3000)
 
             val isLogged = settings.getBoolean("is_logged_in", false)
-
             currentScreen = if (isLogged) AppScreen.HABIT_DAY else AppScreen.WELCOME1
         }
     }
 
     AppContent(
+        di,
         currentScreen = currentScreen,
         onScreenChange = { nextScreen -> currentScreen = nextScreen }
     )
@@ -32,6 +35,7 @@ fun App() {
 
 @Composable
 fun AppContent(
+    di: DI,
     currentScreen: AppScreen,
     onScreenChange: (AppScreen) -> Unit
 ) {
@@ -59,13 +63,21 @@ fun AppContent(
             )
 
             AppScreen.HABIT_DAY -> HabitDayScreen(
+                di.habitRepository,
+                di.habitFactRepository,
                 onAddHabitClick = { onScreenChange(AppScreen.NEW_HABIT) },
                 onHabitClick = { onScreenChange(AppScreen.HABIT_DETAILS) },
                 onTabClick = { tabScreen -> onScreenChange(tabScreen) }
             )
             AppScreen.NEW_HABIT -> NewHabitScreen(
                 onBackClick = { onScreenChange(AppScreen.HABIT_DAY) },
-                onSaveClick = { onScreenChange(AppScreen.HABIT_DAY) }
+                onSaveClick = { newHabit ->
+                    createNewHabit(
+                        habit = newHabit,
+                        habitRepository = di.habitRepository
+                    )
+                    onScreenChange(AppScreen.HABIT_DAY)
+                }
             )
             AppScreen.HABIT_DETAILS -> HabitDetailsScreen(
                 onBackClick = { onScreenChange(AppScreen.HABIT_DAY) },
@@ -87,6 +99,7 @@ fun AppContent(
 @Composable
 fun AppPreview() {
     AppContent(
+        DI(),
         currentScreen = AppScreen.WELCOME1,
         onScreenChange = {}
     )

@@ -1,4 +1,4 @@
-package com.habitloop.app.matreshka
+package com.habitloop.app.habit
 
 import kotlin.test.Test
 import kotlin.test.assertEquals

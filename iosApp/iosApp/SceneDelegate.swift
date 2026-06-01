@@ -8,7 +8,7 @@ class UITextLoupeSessionDummy: NSObject {}
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     var window: UIWindow?
     
-    func scene(
+    func scene( 
         _ scene: UIScene,
         willConnectTo session: UISceneSession,
         options connectionOptions: UIScene.ConnectionOptions
@@ -18,7 +18,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         let window = UIWindow(windowScene: windowScene)
         window.frame = UIScreen.main.bounds
         
-        let rootVC = HabitMainKt.HabitViewController()
+        let rootVC = AppLauncher.shared.create()
         window.rootViewController = rootVC
         self.window = window
         window.makeKeyAndVisible()

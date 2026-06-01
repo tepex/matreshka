@@ -6,6 +6,7 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -35,6 +36,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -45,15 +47,17 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.habitloop.app.habit.domain.model.Habit
+import com.habitloop.app.habit.ui.model.toAbbr
 import com.habitloop.app.habit.ui.model.toColor
 import com.habitloop.app.habit.ui.model.toIcon
+import kotlinx.datetime.DayOfWeek
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NewHabitScreen(
     onBackClick: () -> Unit = {},
-    onSaveClick: (name: String, iconIndex: Int, colorIndex: Int, daysOfWeek: Set<Int>, reminderTime: String?) -> Unit = { _, _, _, _, _ -> }
+    onSaveClick: (Habit) -> Unit = {}
 ) {
     // Палитра базовых цветов по макету Figma
     val backgroundWhite = Color(0xFFFFFFFF)
@@ -73,7 +77,7 @@ fun NewHabitScreen(
     // Стейты времени напоминания и выбранных дней (1 = Пн, 7 = Вс)
     var selectedHour by remember { mutableStateOf("09") }
     var selectedMinute by remember { mutableStateOf("00") }
-    var selectedDays by remember { mutableStateOf(setOf(1, 2, 3, 4, 5, 6, 7)) }
+    val selectedDays = remember { mutableStateListOf<Int>() }
 
     // Контроль открытия выпадающих списков времени
     var isHourMenuExpanded by remember { mutableStateOf(false) }
@@ -86,9 +90,10 @@ fun NewHabitScreen(
     val minutesList = listOf(0, 15, 30, 45).map { it.toString().padStart(2, '0') }
 
     // TODO: move to mapper.kt
+    /*
     val daysOfWeek = listOf(
         1 to "Пн", 2 to "Вт", 3 to "Ср", 4 to "Чт", 5 to "Пт", 6 to "Сб", 7 to "Вс"
-    )
+    )*/
 
     // Валидация всей формы на лету
     val isNameValid = habitName.isNotBlank()
@@ -279,7 +284,8 @@ fun NewHabitScreen(
                         )
                         .clickable {
                             isEveryday = true
-                            selectedDays = setOf(1, 2, 3, 4, 5, 6, 7)
+                            selectedDays.clear()
+                            selectedDays.addAll(DayOfWeek.entries.map { it.ordinal })
                         }
                         .padding(vertical = 8.dp),
                     contentAlignment = Alignment.Center
@@ -304,7 +310,7 @@ fun NewHabitScreen(
                         )
                         .clickable {
                             isEveryday = false
-                            selectedDays = emptySet() // Сбрасываем для ручного выбора
+                            selectedDays.clear() // Сбрасываем для ручного выбора
                         }
                         .padding(vertical = 8.dp),
                     contentAlignment = Alignment.Center
@@ -325,40 +331,50 @@ fun NewHabitScreen(
                 exit = fadeOut() + shrinkVertically()
             ) {
                 Column {
+
                     Spacer(modifier = Modifier.height(16.dp))
+
                     Text(
                         text = "Выберите дни недели",
                         fontSize = 14.sp,
                         color = if (isDaysSelectionValid) textGray else errorRed,
                         fontWeight = FontWeight.Medium
                     )
+
                     Spacer(modifier = Modifier.height(12.dp))
+
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
-                        daysOfWeek.forEach { (dayNumber, dayName) ->
-                            val isDaySelected = selectedDays.contains(dayNumber)
+                        DayOfWeek.entries.forEach { day ->
+                            val dayIndex = day.ordinal
+                            val isSelected = selectedDays.contains(dayIndex)
+
                             Box(
                                 modifier = Modifier
-                                    .size(40.dp)
+                                    .size(40.dp) // Ваша оригинальная геометрия кнопок
                                     .background(
-                                        color = if (isDaySelected) brandBlue else grayField,
+                                        color = if (isSelected) brandBlue else Color.Transparent,
+                                        shape = CircleShape
+                                    )
+                                    .border(
+                                        width = if (isSelected) 0.dp else 1.dp,
+                                        color = textGray,
                                         shape = CircleShape
                                     )
                                     .clickable {
-                                        val updatedDays = selectedDays.toMutableSet()
-                                        if (isDaySelected) updatedDays.remove(dayNumber) else updatedDays.add(dayNumber)
-                                        selectedDays = updatedDays
-                                        if (updatedDays.size == 7) isEveryday = true
+                                        if (isSelected) selectedDays.remove(dayIndex)
+                                        else selectedDays.add(dayIndex)
                                     },
                                 contentAlignment = Alignment.Center
                             ) {
                                 Text(
-                                    text = dayName,
+                                    // Вызываем ваш готовый маппер из mapper.kt
+                                    text = day.toAbbr(),
                                     fontSize = 14.sp,
-                                    fontWeight = FontWeight.Medium,
-                                    color = if (isDaySelected) Color.White else textDark
+                                    fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
+                                    color = if (isSelected) Color.White else textDark
                                 )
                             }
                         }
@@ -369,7 +385,7 @@ fun NewHabitScreen(
             Spacer(modifier = Modifier.height(24.dp))
 
 
-            /*
+            /* Выключено в текущей версии
 
             // 5. Напоминания и выбор Времени (Кроссплатформенный Dropdown)
             Row(
@@ -489,10 +505,23 @@ fun NewHabitScreen(
             Button(
                 onClick = {
                     if (isFormValid) {
+
+                        val targetIcon = Habit.Data.IconType.entries[selectedIconIndex]
+                        val targetColor = Habit.Data.ColorType.entries[selectedColorIndex]
+                        // Преобразуем наш SnapshotStateList в стандартный Set<Int> для домена
+                        val weekIndicesSet: Set<Int> = selectedDays.toSet()
+
+                        // Напоминание
                         val finalReminderTime = if (isReminderEnabled) formattedTime else null
-                        onSaveClick(habitName.trim(), selectedIconIndex, selectedColorIndex, selectedDays, finalReminderTime)
-                    }
-                },
+
+                        // Собираем доменную модель Habit.Data
+                        Habit.create(
+                            name = habitName.trim(),
+                            icon = targetIcon,
+                            color = targetColor,
+                            weekIndicies = weekIndicesSet
+                        ).also { onSaveClick(it) }
+                    } },
                 enabled = isFormValid,
                 modifier = Modifier.fillMaxWidth()
                     .height(52.dp),

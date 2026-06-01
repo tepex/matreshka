@@ -59,7 +59,9 @@ fun getHabitFactsForDate(
 fun switchHabitFactForDate(
     date: LocalDate,
     i: Int,
+    isCompleted: Boolean,
     habitFactRepository: HabitFactRepository
 ) {
-    //habitFactRepository.update(date, i, )
+    habitFactRepository.update(date, i, isCompleted)
+
 }

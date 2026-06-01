@@ -64,7 +64,7 @@ fun NewHabitScreen(
     val errorRed = Color(0xFFE53935)
 
     // Стейты элементов формы
-    var habitName by remember { mutableStateOf("Утренняя пробежка") }
+    var habitName by remember { mutableStateOf("") }
     var selectedIconIndex by remember { mutableStateOf(0) }
     var selectedColorIndex by remember { mutableStateOf(0) }
     var isEveryday by remember { mutableStateOf(true) }
@@ -85,6 +85,7 @@ fun NewHabitScreen(
     val hoursList = (0..23).map { it.toString().padStart(2, '0') }
     val minutesList = listOf(0, 15, 30, 45).map { it.toString().padStart(2, '0') }
 
+    // TODO: move to mapper.kt
     val daysOfWeek = listOf(
         1 to "Пн", 2 to "Вт", 3 to "Ср", 4 to "Чт", 5 to "Пт", 6 to "Сб", 7 to "Вс"
     )
@@ -179,9 +180,8 @@ fun NewHabitScreen(
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
 
-                /*
 
-                Habit.Data.Type.entries.forEachIndexed { i, type ->
+                Habit.Data.IconType.entries.forEachIndexed { i, type ->
                     val isSelected = i == selectedIconIndex
                     Box(
                         modifier = Modifier
@@ -210,7 +210,6 @@ fun NewHabitScreen(
                     }
                 }
 
-                */
 
             }
 
@@ -221,15 +220,14 @@ fun NewHabitScreen(
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            /*
-
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Habit.TypeColor.entries.forEachIndexed { i, typeColor ->
+                Habit.Data.ColorType.entries.forEachIndexed { i, typeColor ->
                     val isSelected = i == selectedColorIndex
-                    val isColorLight = typeColor == Habit.TypeColor.COLOR3
+                    // TODO: пока так
+                    val isColorLight = typeColor == Habit.Data.ColorType.COLOR3
 
                     Box(
                         modifier = Modifier
@@ -256,7 +254,7 @@ fun NewHabitScreen(
                         }
                     }
                 }
-            }*/
+            }
 
             Spacer(modifier = Modifier.height(28.dp))
 

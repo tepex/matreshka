@@ -33,7 +33,7 @@ class HabitFactRepositoryImpl : HabitFactRepository {
     override fun update(day: LocalDate, i: Int, isCompleted: Boolean): Result<HabitFact> =
         decode().toMutableMap().let { map ->
             map[day]?.toMutableList()?.let { facts ->
-                facts[i].switchCompletion().let { changed ->
+                facts[i].setCompletion(isCompleted).let { changed ->
                     facts[i] = changed
                     map[day] = facts
                     storage = json.encodeToString(map)

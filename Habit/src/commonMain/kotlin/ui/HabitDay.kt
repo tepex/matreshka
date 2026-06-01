@@ -5,6 +5,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -23,6 +24,7 @@ import com.habitloop.app.habit.domain.HabitFactRepository
 import com.habitloop.app.habit.domain.HabitRepository
 import com.habitloop.app.habit.domain.getHabitFactsForDate
 import com.habitloop.app.habit.domain.model.HabitFactAggregate
+import com.habitloop.app.habit.domain.switchHabitFactForDate
 import com.habitloop.app.habit.ui.model.HabitItem
 import com.habitloop.app.habit.ui.model.toHabitItem
 import com.habitloop.app.habit.ui.model.toRu
@@ -163,12 +165,16 @@ fun HabitDayScreen(
                 verticalArrangement = Arrangement.spacedBy(14.dp),
                 modifier = Modifier.fillMaxWidth()
             ) {
-                items(habitsList) { habitItem ->
+                itemsIndexed(habitsList) { i, habitItem ->
                     HabitCard(
                         habitItem = habitItem,
                         isCheckboxEnabled = isClickableDate,
                         onHabitClick = { onHabitClick(habitItem.id) },
-                        onCheckedChange = {} // выше
+                        onCheckedChange = {
+                            switchHabitFactForDate(selectedDate, i, habitFactRepository)
+                            // временное решение на скорую руку для обновления Compose стейта
+                            ++stateUpdateTrigger
+                        }
                     )
                 }
             }

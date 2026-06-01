@@ -30,16 +30,14 @@ class HabitFactRepositoryImpl : HabitFactRepository {
             }
         }
 
-    override fun update(day: LocalDate, i: Int, isCompleted: Boolean): Result<HabitFact> =
+    override fun update(day: LocalDate, i: Int, fact: HabitFact): Result<HabitFact> =
         decode().toMutableMap().let { map ->
             map[day]?.toMutableList()?.let { facts ->
-                facts[i].setCompletion(isCompleted).let { changed ->
-                    facts[i] = changed
-                    map[day] = facts
-                    storage = json.encodeToString(map)
-                    println("set completed for day[$i]: $day, $storage")
-                    Result.success(changed)
-                }
+                facts[i] = fact
+                map[day] = facts
+                storage = json.encodeToString(map)
+                println("set completed for day[$i]: $day, $storage")
+                Result.success(fact)
             } ?: Result.failure(RuntimeException("HabitFact $i not found for date: $day"))
         }
 

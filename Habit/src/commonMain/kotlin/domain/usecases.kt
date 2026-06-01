@@ -59,9 +59,9 @@ fun getHabitFactsForDate(
 fun switchHabitFactForDate(
     date: LocalDate,
     i: Int,
-    isCompleted: Boolean,
     habitFactRepository: HabitFactRepository
 ) {
-    habitFactRepository.update(date, i, isCompleted)
+    val newState = habitFactRepository.getHabitFacts(date)[i].switchCompletion()
+    habitFactRepository.update(date, i, newState)
 
 }

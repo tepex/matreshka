@@ -9,7 +9,7 @@ interface HabitFactRepository {
 
     fun add(day: LocalDate, fact: HabitFact): Result<HabitFact>
 
-    fun update(day: LocalDate, i: Int, isCompleted: Boolean): Result<HabitFact>
+    fun update(day: LocalDate, i: Int, fact: HabitFact): Result<HabitFact>
     /*
     fun create(day: LocalDate, habit: Habit): Result<HabitFact>
 

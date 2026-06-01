@@ -127,7 +127,7 @@ private class FakeHabitFactRepository(private val stubFacts: List<HabitFact>) : 
         TODO("Not yet implemented")
     }
 
-    override fun update(day: LocalDate, i: Int, isCompleted: Boolean): Result<HabitFact> {
+    override fun update(day: LocalDate, i: Int, fact: HabitFact): Result<HabitFact> {
         TODO("Not yet implemented")
     }
 }

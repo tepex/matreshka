@@ -51,15 +51,15 @@ class GetHabitStatisticsTest : FunSpec({
 
                 habitFactRepository.addAll(
                     LocalDate(2026, 4, 9),
-                    listOf(HabitFact.create(habit.id).apply { setCompletion(true) })
+                    listOf(HabitFact.create(habit.id).setCompletion(true))
                 )
                 habitFactRepository.addAll(
                     LocalDate(2026, 4, 8),
-                    listOf(HabitFact.create(habit.id).apply { setCompletion(true) })
+                    listOf(HabitFact.create(habit.id).setCompletion(true))
                 )
                 habitFactRepository.addAll(
                     LocalDate(2026, 4, 7),
-                    listOf(HabitFact.create(habit.id).apply { setCompletion(true) })
+                    listOf(HabitFact.create(habit.id).setCompletion(true))
                 )
 
                 getHabitStatistics(habit.id, habitRepository, habitFactRepository, today).run {
@@ -81,11 +81,11 @@ class GetHabitStatisticsTest : FunSpec({
                 // Streak 1: 2 completed days
                 habitFactRepository.addAll(
                     LocalDate(2026, 4, 1),
-                    listOf(HabitFact.create(habit.id).apply { setCompletion(true) })
+                    listOf(HabitFact.create(habit.id).setCompletion(true))
                 )
                 habitFactRepository.addAll(
                     LocalDate(2026, 4, 2),
-                    listOf(HabitFact.create(habit.id).apply { setCompletion(true) })
+                    listOf(HabitFact.create(habit.id).setCompletion(true))
                 )
 
                 // 2026-04-03 — Gap (streak resets)
@@ -93,19 +93,19 @@ class GetHabitStatisticsTest : FunSpec({
                 // Streak 2: 4 completed days (this should be the best streak)
                 habitFactRepository.addAll(
                     LocalDate(2026, 4, 4),
-                    listOf(HabitFact.create(habit.id).apply { setCompletion(true) })
+                    listOf(HabitFact.create(habit.id).setCompletion(true))
                 )
                 habitFactRepository.addAll(
                     LocalDate(2026, 4, 5),
-                    listOf(HabitFact.create(habit.id).apply { setCompletion(true) })
+                    listOf(HabitFact.create(habit.id).setCompletion(true))
                 )
                 habitFactRepository.addAll(
                     LocalDate(2026, 4, 6),
-                    listOf(HabitFact.create(habit.id).apply { setCompletion(true) })
+                    listOf(HabitFact.create(habit.id).setCompletion(true))
                 )
                 habitFactRepository.addAll(
                     LocalDate(2026, 4, 7),
-                    listOf(HabitFact.create(habit.id).apply { setCompletion(true) })
+                    listOf(HabitFact.create(habit.id).setCompletion(true))
                 )
 
                 getHabitStatistics(habit.id, habitRepository, habitFactRepository, today).run {
@@ -128,13 +128,13 @@ class GetHabitStatisticsTest : FunSpec({
                 for (i in 1..6) {
                     habitFactRepository.addAll(
                         today.minus(i, kotlinx.datetime.DateTimeUnit.DAY),
-                        listOf(HabitFact.create(habit.id).apply { setCompletion(true) })
+                        listOf(HabitFact.create(habit.id).setCompletion(true))
                     )
                 }
                 for (i in 7..10) {
                     habitFactRepository.addAll(
                         today.minus(i, kotlinx.datetime.DateTimeUnit.DAY),
-                        listOf(HabitFact.create(habit.id).apply { setCompletion(false) })
+                        listOf(HabitFact.create(habit.id).setCompletion(false))
                     )
                 }
 

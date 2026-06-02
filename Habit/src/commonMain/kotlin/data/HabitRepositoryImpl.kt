@@ -83,6 +83,12 @@ class HabitRepositoryImpl(/*private val storage: HabitStorage*/) : HabitReposito
             ?.toSet()
             ?.also { println("[HabitRepository] get($day): $it") }
             ?: emptySet()
+
+    override fun getHabit(id: Habit.Id): Result<Habit> =
+        storage.takeIf { it.isNotBlank() }?.let {
+            json.decodeFromString<Set<Habit>>(it)
+                .firstOrNull() { it.id == id } ?.let { Result.success(it) }
+        } ?: Result.failure(RuntimeException("Habit id: $id not found"))
 }
 
 val predefinedHabits = setOf(

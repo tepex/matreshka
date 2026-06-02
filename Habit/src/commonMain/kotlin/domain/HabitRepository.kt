@@ -11,10 +11,9 @@ interface HabitRepository {
 
     fun create(habit: Habit): Result<Habit>
 
-    /*
     fun getHabit(id: Habit.Id): Result<Habit>
 
-
+    /*
 
     fun update(id: Habit.Id, data: Habit.Data): Result<Habit>
 

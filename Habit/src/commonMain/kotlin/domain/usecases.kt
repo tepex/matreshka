@@ -112,7 +112,7 @@ fun getHabitStatistics(
 
             // Проверяем, выполнена ли привычка сегодня (если день активный по расписанию)
             val isCompletedToday = habit.data.weekly.value[today.dayOfWeek.ordinal] &&
-                habitFactRepository.getHabitFacts(today).find { it.habitId == habitId }?.isCompleted == true
+                habitFactRepository.getHabitFacts(today).find { it.habitId.value == habitId.value }?.isCompleted == true
 
             // вычисление серий (streaks)
             var bestStreak = 0
@@ -120,7 +120,8 @@ fun getHabitStatistics(
 
             // Идем в хронологическом порядке для вычисления лучшей серии
             for (date in activeDaysHistory) {
-                val isCompleted = habitFactRepository.getHabitFacts(date).find { it.habitId == habitId }?.isCompleted == true
+                val isCompleted = habitFactRepository.getHabitFacts(date)
+                    .find { it.habitId.value == habitId.value }?.isCompleted == true
                 if (isCompleted) {
                     ++runningStreak
                     if (runningStreak > bestStreak)  bestStreak = runningStreak
@@ -139,11 +140,12 @@ fun getHabitStatistics(
             var checkDate = today.minus(30, DateTimeUnit.DAY)
 
             while (checkDate <= today) {
-                habitFactRepository.getHabitFacts(checkDate).find { it.habitId == habitId }?.also { targetFact ->
-                    // Согласно спецификации, считаем дни, для которых физически существует запись факта
-                    ++totalFactsIn30Days
-                    if (targetFact.isCompleted) ++completedFactsIn30Days
-                }
+                habitFactRepository.getHabitFacts(checkDate).find { it.habitId.value == habitId.value }
+                    ?.also { targetFact ->
+                        // Согласно спецификации, считаем дни, для которых физически существует запись факта
+                        ++totalFactsIn30Days
+                        if (targetFact.isCompleted) ++completedFactsIn30Days
+                    }
                 checkDate = checkDate.plus(1, DateTimeUnit.DAY)
             }
 

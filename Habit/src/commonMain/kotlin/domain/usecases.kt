@@ -1,6 +1,5 @@
 package com.habitloop.app.habit.domain
 
-import com.habitloop.app.habit.domain.model.DayHabitFacts
 import com.habitloop.app.habit.domain.model.Habit
 import com.habitloop.app.habit.domain.model.HabitFact
 import com.habitloop.app.habit.domain.model.HabitFactAggregate
@@ -16,7 +15,7 @@ import kotlinx.datetime.LocalDate
  * @param today текущий день
  * @param habitFactRepository репозиторий [HabitFact]
  * @param habitRepository репозиторий [Habit]
- * @return [DayHabitFacts] для текущего дня
+ * @return [List]<[HabitFactAggregate]> для текущего дня
  * */
 fun getHabitFactsForDate(
     date: LocalDate,

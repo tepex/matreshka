@@ -63,3 +63,4 @@ fun getDaysWord(streak: Int): String =
         2, 3, 4 -> "дня"
         else -> "дней"
     }
+

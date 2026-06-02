@@ -11,11 +11,14 @@ enum class AppScreen {
     SPLASH, WELCOME1, WELCOME2, WELCOME3, LOGIN, HABIT_DAY, NEW_HABIT, HABIT_DETAILS, STATISTICS, SETTINGS
 }
 
+const val UNKNOWN_HABIT_ID = -1
+
 @Composable
 fun App() {
     val di = remember { DI() }
     val settings = remember { com.russhwolf.settings.Settings() }
     var currentScreen by remember { mutableStateOf(AppScreen.SPLASH) }
+    var selectedHabitId by remember { mutableStateOf<Int>(UNKNOWN_HABIT_ID) }
 
     if (currentScreen == AppScreen.SPLASH) {
         LaunchedEffect(Unit) {
@@ -29,7 +32,12 @@ fun App() {
     AppContent(
         di,
         currentScreen = currentScreen,
-        onScreenChange = { nextScreen -> currentScreen = nextScreen }
+        selectedHabitId = selectedHabitId,
+        onScreenChange = { nextScreen -> currentScreen = nextScreen },
+        onHabitSelected = { id ->
+            selectedHabitId = id
+            currentScreen = AppScreen.HABIT_DETAILS
+        }
     )
 }
 
@@ -37,7 +45,9 @@ fun App() {
 fun AppContent(
     di: DI,
     currentScreen: AppScreen,
-    onScreenChange: (AppScreen) -> Unit
+    selectedHabitId: Int,
+    onScreenChange: (AppScreen) -> Unit,
+    onHabitSelected: (Int) -> Unit
 ) {
     MaterialTheme {
         when (currentScreen) {
@@ -66,7 +76,7 @@ fun AppContent(
                 di.habitRepository,
                 di.habitFactRepository,
                 onAddHabitClick = { onScreenChange(AppScreen.NEW_HABIT) },
-                onHabitClick = { onScreenChange(AppScreen.HABIT_DETAILS) },
+                onHabitClick = { id -> onHabitSelected(id) },
                 onTabClick = { tabScreen -> onScreenChange(tabScreen) }
             )
             AppScreen.NEW_HABIT -> NewHabitScreen(
@@ -79,10 +89,15 @@ fun AppContent(
                     onScreenChange(AppScreen.HABIT_DAY)
                 }
             )
-            AppScreen.HABIT_DETAILS -> HabitDetailsScreen(
-                onBackClick = { onScreenChange(AppScreen.HABIT_DAY) },
-                onEditClick = { onScreenChange(AppScreen.NEW_HABIT) }
-            )
+            AppScreen.HABIT_DETAILS ->
+                if (selectedHabitId != -1) {
+                    HabitDetailsScreen(
+                        habitId = selectedHabitId,
+                        onBackClick = { onScreenChange(AppScreen.HABIT_DAY) }
+                    )
+                } else {
+                    onScreenChange(AppScreen.HABIT_DAY)
+                }
 
             AppScreen.STATISTICS -> StatisticsScreen(
                 onTabClick = { tabScreen -> onScreenChange(tabScreen) }

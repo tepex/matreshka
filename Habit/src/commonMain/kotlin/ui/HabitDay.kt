@@ -2,17 +2,44 @@ package com.habitloop.app.habit.ui
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.DirectionsRun
-import androidx.compose.material.icons.filled.*
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.BarChart
+import androidx.compose.material.icons.filled.CalendarToday
+import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.RadioButtonUnchecked
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.NavigationBarItemDefaults
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -23,12 +50,14 @@ import com.habitloop.app.habit.DI
 import com.habitloop.app.habit.domain.HabitFactRepository
 import com.habitloop.app.habit.domain.HabitRepository
 import com.habitloop.app.habit.domain.getHabitFactsForDate
-import com.habitloop.app.habit.domain.model.HabitFactAggregate
+import com.habitloop.app.habit.domain.model.Habit
 import com.habitloop.app.habit.domain.switchHabitFactForDate
 import com.habitloop.app.habit.ui.model.HabitItem
 import com.habitloop.app.habit.ui.model.toHabitItem
 import com.habitloop.app.habit.ui.model.toRu
-import kotlinx.datetime.*
+import kotlinx.datetime.Clock
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
 val bgLightBlue = Color(0xFFF4F7FA)
@@ -41,7 +70,7 @@ fun HabitDayScreen(
     habitRepository: HabitRepository,
     habitFactRepository: HabitFactRepository,
     onAddHabitClick: () -> Unit = {},
-    onHabitClick: (Int) -> Unit = {},
+    onHabitClick: (Habit.Id) -> Unit = {},
     onTabClick: (AppScreen) -> Unit = {}
 ) {
 

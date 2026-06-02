@@ -35,7 +35,7 @@ fun Habit.Data.ColorType.toColor() = when (this) {
 }
 fun HabitFactAggregate.toHabitItem(): HabitItem =
     HabitItem(
-        id = fact.habitId.value,
+        id = fact.habitId,
         name = habitData.name.value,
         icon = habitData.icon.toIcon(),
         iconBgColor = habitData.color.toColor(),

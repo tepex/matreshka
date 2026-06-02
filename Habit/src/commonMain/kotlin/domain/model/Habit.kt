@@ -23,6 +23,10 @@ class Habit(
         override fun toString(): String =
             value.toString()
 
+        companion object {
+            val INVALID = Id(-1)
+        }
+
     }
 
     @Serializable

@@ -131,6 +131,10 @@ private class FakeHabitFactRepository(private val stubFacts: List<HabitFact>) : 
         TODO("Not yet implemented")
     }
 
+    override fun addAll(day: LocalDate, facts: List<HabitFact>): Result<List<HabitFact>> {
+        TODO("Not yet implemented")
+    }
+
     override fun update(day: LocalDate, i: Int, fact: HabitFact): Result<HabitFact> {
         TODO("Not yet implemented")
     }

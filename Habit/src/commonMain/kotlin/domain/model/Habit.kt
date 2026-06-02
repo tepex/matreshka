@@ -96,13 +96,13 @@ class Habit(
             name: String,
             icon: Data.IconType,
             color: Data.ColorType,
-            weekIndicies: Set<Int>,
+            weekIndices: Set<Int>,
         ): Habit =
             Data(
                 Data.Name(name),
                 icon,
                 color,
-                Data.Weekly(BooleanArray(7) { i -> i in weekIndicies }),
+                Data.Weekly(BooleanArray(7) { i -> i in weekIndices }),
                 false
             ).let { Habit(Habit.Id(), it) }
     }

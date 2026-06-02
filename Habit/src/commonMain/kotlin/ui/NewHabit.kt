@@ -519,7 +519,7 @@ fun NewHabitScreen(
                             name = habitName.trim(),
                             icon = targetIcon,
                             color = targetColor,
-                            weekIndicies = weekIndicesSet
+                            weekIndices = weekIndicesSet
                         ).also { onSaveClick(it) }
                     } },
                 enabled = isFormValid,

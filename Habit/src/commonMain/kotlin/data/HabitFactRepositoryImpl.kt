@@ -30,6 +30,16 @@ class HabitFactRepositoryImpl : HabitFactRepository {
             }
         }
 
+    override fun addAll(day: LocalDate, facts: List<HabitFact>): Result<List<HabitFact>> =
+        decode().toMutableMap().let { map ->
+            (map[day]?.toMutableList() ?: mutableListOf()).let { existing ->
+                existing += facts
+                map[day] = existing
+                storage = json.encodeToString(map)
+                Result.success(facts)
+            }
+        }
+
     override fun update(day: LocalDate, i: Int, fact: HabitFact): Result<HabitFact> =
         decode().toMutableMap().let { map ->
             map[day]?.toMutableList()?.let { facts ->

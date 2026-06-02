@@ -15,11 +15,12 @@ class HabitRepositoryImpl(/*private val storage: HabitStorage*/) : HabitReposito
         coerceInputValues = true
     }
 
+    /*
     init {
         val jsonString = json.encodeToString(predefinedHabits)
         storage = jsonString
         println("[HabitRepository] Init: $storage")
-    }
+    }*/
 
     /*
     override fun getHabits(): List<Habit> =
@@ -70,8 +71,9 @@ class HabitRepositoryImpl(/*private val storage: HabitStorage*/) : HabitReposito
                 set += habit
                 storage = json.encodeToString(set)
                 println("[HabitRepository] added new habit $habit")
+                /*
                 println("[HabitRepository] saved habits:")
-                println(storage)
+                println(storage)*/
                 Result.success(habit)
             }
 

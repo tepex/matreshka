@@ -117,6 +117,10 @@ private class FakeHabitRepository(private val stubHabits: Set<Habit>) : HabitRep
     override fun create(habit: Habit): Result<Habit> {
         TODO("Not yet implemented")
     }
+
+    override fun getHabit(id: Habit.Id): Result<Habit> {
+        TODO("Not yet implemented")
+    }
 }
 
 private class FakeHabitFactRepository(private val stubFacts: List<HabitFact>) : HabitFactRepository {

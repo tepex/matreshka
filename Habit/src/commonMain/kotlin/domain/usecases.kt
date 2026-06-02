@@ -4,7 +4,10 @@ import com.habitloop.app.habit.domain.model.Habit
 import com.habitloop.app.habit.domain.model.HabitFact
 import com.habitloop.app.habit.domain.model.HabitFactAggregate
 import com.habitloop.app.habit.domain.model.HabitStatistics
+import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.LocalDate
+import kotlinx.datetime.minus
+import kotlinx.datetime.plus
 
 /** Актуальные и активные [HabitFact] для заданного дня.
  *
@@ -88,6 +91,66 @@ fun getHabitStatistics(
     habitRepository: HabitRepository,
     habitFactRepository: HabitFactRepository,
     today: LocalDate
-): HabitStatistics {
-    TODO()
-}
+): HabitStatistics =
+    habitRepository.getHabit(habitId).fold(
+        onFailure = { HabitStatistics(0, 0, 0) },
+        onSuccess = { habit ->
+            val startDate = LocalDate(2026, 1, 1)
+            if (today < startDate) return HabitStatistics(0, 0, 0)
+
+            // Формируем список всех дней от startDate до вчерашнего дня включительно
+            val yesterday = today.minus(1, DateTimeUnit.DAY)
+            val activeDaysHistory = mutableListOf<LocalDate>()
+            var currentIterationDate = startDate
+
+            while (currentIterationDate <= yesterday) {
+                // Учитываем только те дни, которые активны по расписанию этой конкретной привычки
+                if (habit.data.weekly.value[currentIterationDate.dayOfWeek.ordinal])
+                    activeDaysHistory.add(currentIterationDate)
+                currentIterationDate = currentIterationDate.plus(1, DateTimeUnit.DAY)
+            }
+
+            // Проверяем, выполнена ли привычка сегодня (если день активный по расписанию)
+            val isCompletedToday = habit.data.weekly.value[today.dayOfWeek.ordinal] &&
+                habitFactRepository.getHabitFacts(today).find { it.habitId == habitId }?.isCompleted == true
+
+            // вычисление серий (streaks)
+            var bestStreak = 0
+            var runningStreak = 0
+
+            // Идем в хронологическом порядке для вычисления лучшей серии
+            for (date in activeDaysHistory) {
+                val isCompleted = habitFactRepository.getHabitFacts(date).find { it.habitId == habitId }?.isCompleted == true
+                if (isCompleted) {
+                    ++runningStreak
+                    if (runningStreak > bestStreak)  bestStreak = runningStreak
+                } else runningStreak = 0 // сброс серии при пропуске
+            }
+
+            // Вычисляем текущую серию (идем с конца истории в прошлое)
+            // Если сегодня еще не выполнено, проверяем, не прервалась ли серия вчера
+            val currentStreak = if (isCompletedToday) runningStreak + 1 else runningStreak
+            // Корректируем лучшую серию, если текущая (с учетом сегодняшнего выполнения) оказалась длиннее
+            if (currentStreak > bestStreak) bestStreak = currentStreak
+
+            // вычисление процента выполнения за 30 дней (success rate)
+            var totalFactsIn30Days = 0
+            var completedFactsIn30Days = 0
+            var checkDate = today.minus(30, DateTimeUnit.DAY)
+
+            while (checkDate <= today) {
+                habitFactRepository.getHabitFacts(checkDate).find { it.habitId == habitId }?.also { targetFact ->
+                    // Согласно спецификации, считаем дни, для которых физически существует запись факта
+                    ++totalFactsIn30Days
+                    if (targetFact.isCompleted) ++completedFactsIn30Days
+                }
+                checkDate = checkDate.plus(1, DateTimeUnit.DAY)
+            }
+
+            HabitStatistics(
+                currentStreak,
+                bestStreak,
+                if (totalFactsIn30Days > 0) ((completedFactsIn30Days.toDouble() / totalFactsIn30Days) * 100).toInt() else 0
+            )
+        }
+    )

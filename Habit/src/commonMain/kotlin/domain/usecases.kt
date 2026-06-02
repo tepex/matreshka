@@ -3,6 +3,7 @@ package com.habitloop.app.habit.domain
 import com.habitloop.app.habit.domain.model.Habit
 import com.habitloop.app.habit.domain.model.HabitFact
 import com.habitloop.app.habit.domain.model.HabitFactAggregate
+import com.habitloop.app.habit.domain.model.HabitStatistics
 import kotlinx.datetime.LocalDate
 
 /** Актуальные и активные [HabitFact] для заданного дня.
@@ -77,4 +78,16 @@ fun createNewHabit(
     // (например, проверка на дубликаты имен, валидация лимитов привычек и т.д.)
 
     habitRepository.create(habit)
+}
+
+/**
+ * @see docs/statistics.adoc
+ * */
+fun getHabitStatistics(
+    habitId: Habit.Id,
+    habitRepository: HabitRepository,
+    habitFactRepository: HabitFactRepository,
+    today: LocalDate
+): HabitStatistics {
+    TODO()
 }

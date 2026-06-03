@@ -16,8 +16,10 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.ChevronLeft
@@ -126,12 +128,14 @@ fun HabitDetailsScreen(
             )
         }
     ) { paddingValues ->
+        val scrollState = rememberScrollState()
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
                 .padding(horizontal = 24.dp)
                 .background(bgLightBlue)
+                .verticalScroll(scrollState)
         ) {
             Spacer(modifier = Modifier.height(8.dp))
 
@@ -213,7 +217,7 @@ fun HabitDetailsScreen(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-// 3. Интегрированная Тепловая карта (Heatmap)
+            // 3. Интегрированная Тепловая карта (Heatmap)
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(16.dp),
@@ -308,7 +312,7 @@ fun HabitDetailsScreen(
                     // Отрисовка динамической матрицы строк тепловой карты
                     Column(
                         modifier = Modifier.fillMaxWidth(),
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                        verticalArrangement = Arrangement.spacedBy(0.dp)
                     ) {
                         heatmapUiState.rows.forEach { row ->
                             HeatmapWeekRow(row = row, brandBlue = brandBlue)

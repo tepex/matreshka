@@ -106,7 +106,7 @@ class DI {
                 ).also { selectedHabitsForDay ->
                     // Создаем и сохраняем факты выполнения
                     mutableListOf<HabitFact>().apply {
-                        for (habit in selectedHabitsForDay) add(HabitFact.create(habit.id))
+                        for (habit in selectedHabitsForDay) add(HabitFact.create(habit.id).setCompletion(true))
                     }.also { habitFactRepository.addAll(date, it) }
                 }
             }

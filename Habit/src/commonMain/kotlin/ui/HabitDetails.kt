@@ -3,22 +3,44 @@ package com.habitloop.app.habit.ui
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.AcUnit
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ChevronLeft
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.SelfImprovement
-import androidx.compose.material3.*
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -30,9 +52,12 @@ import com.habitloop.app.habit.DI
 import com.habitloop.app.habit.domain.HabitFactRepository
 import com.habitloop.app.habit.domain.HabitRepository
 import com.habitloop.app.habit.domain.getHabitStatistics
+import com.habitloop.app.habit.domain.getHeatmapStatistics
 import com.habitloop.app.habit.domain.model.Habit
 import com.habitloop.app.habit.domain.model.HabitStatistics
-import com.habitloop.app.habit.ui.model.getDaysWord
+import com.habitloop.app.habit.domain.model.HeatmapPeriod
+import com.habitloop.app.habit.domain.model.HeatmapState
+import com.habitloop.app.habit.ui.model.HeatmapUiState
 import kotlinx.datetime.Clock
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
@@ -61,6 +86,16 @@ fun HabitDetailsScreen(
     val stats = habit
         ?.let { remember(it.id) { getHabitStatistics(it, habitFactRepository, today) } }
         ?: HabitStatistics()
+
+    // По умолчанию ставим 28 дней (WEEK4) как в макетах
+    var selectedPeriod by remember { mutableStateOf(HeatmapPeriod.WEEK4) }
+    var isPeriodMenuExpanded by remember { mutableStateOf(false) }
+
+    val heatmapUiState = habit?.let {
+        remember(it.id, selectedPeriod) {
+            getHeatmapStatistics(it, habitFactRepository, today, selectedPeriod)
+        }
+    } ?: HeatmapUiState(emptyList())
 
     println("[HabitDetails] habit: $habit")
     println("[HabitDetails] stats: $stats")
@@ -178,7 +213,7 @@ fun HabitDetailsScreen(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // 3. Симуляция: Тепловая карта (Heatmap) - оставлена без изменений
+// 3. Интегрированная Тепловая карта (Heatmap)
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(16.dp),
@@ -186,34 +221,97 @@ fun HabitDetailsScreen(
                 elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
+                    // Заголовок секции и выпадающий список выбора периода
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Text(text = "Тепловая карта", fontSize = 14.sp, fontWeight = FontWeight.Bold, color = textDark)
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Text(text = "7 дней", fontSize = 12.sp, color = textGray)
-                            Icon(imageVector = Icons.Default.ChevronRight, contentDescription = null, tint = textGray, modifier = Modifier.size(16.dp))
+                        Text(
+                            text = "Тепловая карта",
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = textDark
+                        )
+
+                        // Дропдаун для выбора количества дней анализа
+                        Box {
+                            val periodText = when (selectedPeriod) {
+                                HeatmapPeriod.WEEK1 -> "7 дней"
+                                HeatmapPeriod.WEEK2 -> "14 дней"
+                                HeatmapPeriod.WEEK4 -> "28 дней"
+                            }
+
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                modifier = Modifier.clickable { isPeriodMenuExpanded = true }
+                            ) {
+                                Text(text = periodText, fontSize = 12.sp, color = textGray)
+                                Icon(
+                                    imageVector = Icons.Default.ChevronRight,
+                                    contentDescription = "Выбрать период",
+                                    tint = textGray,
+                                    modifier = Modifier.size(16.dp)
+                                )
+                            }
+
+                            DropdownMenu(
+                                expanded = isPeriodMenuExpanded,
+                                onDismissRequest = { isPeriodMenuExpanded = false }
+                            ) {
+                                DropdownMenuItem(
+                                    text = { Text("7 дней") },
+                                    onClick = {
+                                        selectedPeriod = HeatmapPeriod.WEEK1
+                                        isPeriodMenuExpanded = false
+                                    }
+                                )
+                                DropdownMenuItem(
+                                    text = { Text("14 дней") },
+                                    onClick = {
+                                        selectedPeriod = HeatmapPeriod.WEEK2
+                                        isPeriodMenuExpanded = false
+                                    }
+                                )
+                                DropdownMenuItem(
+                                    text = { Text("28 дней") },
+                                    onClick = {
+                                        selectedPeriod = HeatmapPeriod.WEEK4
+                                        isPeriodMenuExpanded = false
+                                    }
+                                )
+                            }
                         }
                     }
+
                     Spacer(modifier = Modifier.height(16.dp))
-                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+
+                    // Статичная шапка дней недели (Пн-Вс)
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
                         val days = listOf("Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс")
                         days.forEach { day ->
-                            Text(text = day, fontSize = 11.sp, color = textGray, modifier = Modifier.weight(1f), textAlign = TextAlign.Center)
+                            Text(
+                                text = day,
+                                fontSize = 11.sp,
+                                color = textGray,
+                                modifier = Modifier.weight(1f),
+                                textAlign = TextAlign.Center
+                            )
                         }
                     }
+
                     Spacer(modifier = Modifier.height(8.dp))
-                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                        for (i in 0..6) {
-                            Box(
-                                modifier = Modifier
-                                    .weight(1f)
-                                    .padding(horizontal = 4.dp)
-                                    .aspectRatio(1f)
-                                    .background(if (i % 2 == 0) brandBlue else Color(0xFFE5E5EA), shape = CircleShape)
-                            )
+
+                    // Отрисовка динамической матрицы строк тепловой карты
+                    Column(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        heatmapUiState.rows.forEach { row ->
+                            HeatmapWeekRow(row = row, brandBlue = brandBlue)
                         }
                     }
                 }
@@ -331,6 +429,54 @@ fun StatItem(value: String, label: String, valueColor: Color) {
         Text(text = value, fontSize = 28.sp, fontWeight = FontWeight.Black, color = valueColor)
         Spacer(modifier = Modifier.height(2.dp))
         Text(text = label, fontSize = 12.sp, color = Color.Gray)
+    }
+}
+
+@Composable
+fun HeatmapWeekRow(
+    row: com.habitloop.app.habit.ui.model.HeatmapRow,
+    brandBlue: Color
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        row.cells.forEach { cellState ->
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .aspectRatio(1f)
+                    // Дополнительный padding уменьшает размер самого кружка внутри сетки
+                    .padding(16.dp)
+                    .background(
+                        color = when (cellState) {
+                            HeatmapState.COMPLETED -> brandBlue
+                            HeatmapState.NOT_COMPLETED -> Color(0xFFE5E5EA)
+                            HeatmapState.EMPTY -> Color.Transparent
+                        },
+                        shape = CircleShape
+                    )
+            )
+        }
+    }
+}
+
+@Preview
+@Composable
+fun HeatmapWeekRowPreview() {
+    val sampleRow = com.habitloop.app.habit.ui.model.HeatmapRow(
+        cells = listOf(
+            HeatmapState.COMPLETED,
+            HeatmapState.NOT_COMPLETED,
+            HeatmapState.EMPTY,
+            HeatmapState.COMPLETED,
+            HeatmapState.NOT_COMPLETED,
+            HeatmapState.EMPTY,
+            HeatmapState.EMPTY
+        )
+    )
+    Surface(color = Color.White, modifier = Modifier.padding(16.dp)) {
+        HeatmapWeekRow(row = sampleRow, brandBlue = Color(0xFF3B638A))
     }
 }
 

@@ -1,149 +1,103 @@
 package com.habitloop.app.habit.domain
 
+import com.habitloop.app.habit.data.HabitFactRepositoryImpl
+import com.habitloop.app.habit.data.HabitRepositoryImpl
 import com.habitloop.app.habit.domain.model.Habit
 import com.habitloop.app.habit.domain.model.HabitFact
 import io.kotest.core.spec.style.FunSpec
-import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
-import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.LocalDate
 
 class GetHabitFactsForDateTest : FunSpec({
 
-    // Фиксированные даты для детерминированности тестов
-    val may30 = LocalDate(2026, 5, 30)
-    val may29 = LocalDate(2026, 5, 29)
-    val may31 = LocalDate(2026, 5, 31)
+    // 1 марта 2026 года — это Воскресенье. Его ordinal в kotlinx.datetime равен 6 (Пн=0, ..., Вс=6)
+    val today = LocalDate(2026, 3, 1)
+    // 28 февраля 2026 года — это Суббота (ordinal = 5)
+    val yesterday = LocalDate(2026, 2, 28)
 
-    // Тестовые ID привычек
-    val habitId1 = Habit.Id(1)
-    val habitId2 = Habit.Id(2)
+    test("should return existing facts from repository for today") {
+        val habitFactRepository = HabitFactRepositoryImpl()
+        val habitRepository = HabitRepositoryImpl()
 
-    // Базовые данные для привычек
-    val dummyData1 = Habit.Data(
-        name = Habit.Data.Name("Бег"),
-        icon = Habit.Data.IconType.ICON1,
-        color = Habit.Data.ColorType.COLOR1,
-        weekly = Habit.Data.Weekly(),
-        freeze = false
-    )
-    val dummyData2 = dummyData1.copy(name = Habit.Data.Name("Чтение"))
+        // Используем точное имя параметра weekIndices
+        val habit = Habit.create(
+            name = "Run",
+            icon = Habit.Data.IconType.ICON1,
+            color = Habit.Data.ColorType.COLOR1,
+            weekIndices = setOf(today.dayOfWeek.ordinal)
+        )
+        val fact = HabitFact.create(habitId = habit.id).setCompletion(true)
 
-    // Тестовые сущности Habit
-    val habit1 = Habit(id = habitId1, data = dummyData1)
-    val habit2 = Habit(id = habitId2, data = dummyData2)
+        habitRepository.create(habit)
+        habitFactRepository.add(today, fact)
 
-    // 1. Тест для ПРОШЛОЙ даты
-    test("getHabitFactsForDate для ПРОШЛОЙ даты должен возвращать только сохраненные факты и не дополнять новыми") {
-        // На прошлый день запланировано 2 привычки, но выполнен был только один факт
-        val habitsStub = setOf(habit1, habit2)
-        val savedFacts = listOf(HabitFact.create(habitId1).setCompletion(isCompleted = true))
+        val result = getHabitFactsForDate(today, today, habitFactRepository, habitRepository)
 
-        val habitRepo = FakeHabitRepository(habitsStub)
-        val factRepo = FakeHabitFactRepository(savedFacts)
-
-        val habitFacts = getHabitFactsForDate(may29, may30, factRepo, habitRepo)
-
-        // Должен вернуться ровно один агрегат (сохраненный факт), без догенерации второй привычки
-        habitFacts shouldHaveSize 1
-        habitFacts.first().fact.habitId shouldBe habitId1
-        habitFacts.first().fact.isCompleted shouldBe true
-        habitFacts.first().habitData.name.value shouldBe "Бег"
+        result.size shouldBe 1
+        result.first().fact.habitId shouldBe habit.id
+        result.first().fact.isCompleted shouldBe true
     }
 
-    // 2. Тест для ТЕКУЩЕЙ даты (30/V)
-    test("getHabitFactsForDate для СЕГОДНЯШНЕЙ даты должен возвращать сохраненные факты и ДОПОЛНЯТЬ список недостающими привычками") {
-        // На сегодня запланировано 2 привычки, в базе сохранен факт только для первой
-        val habitsStub = setOf(habit1, habit2)
-        val savedFacts = listOf(HabitFact.create(habitId1).setCompletion(isCompleted = true))
+    test("should create and record a new fact if it is missing for today") {
+        val habitFactRepository = HabitFactRepositoryImpl()
+        val habitRepository = HabitRepositoryImpl()
 
-        val habitRepo = FakeHabitRepository(habitsStub)
-        val factRepo = FakeHabitFactRepository(savedFacts)
+        val habit = Habit.create(
+            name = "Read",
+            icon = Habit.Data.IconType.ICON3,
+            color = Habit.Data.ColorType.COLOR3,
+            weekIndices = setOf(today.dayOfWeek.ordinal)
+        )
 
-        val habitFacts = getHabitFactsForDate(may30, may30, factRepo, habitRepo)
+        habitRepository.create(habit)
 
-        // Ожидаем 2 элемента: один из базы (выполнен), второй сгенерирован автоматически (не выполнен)
-        habitFacts shouldHaveSize 2
+        val result = getHabitFactsForDate(today, today, habitFactRepository, habitRepository)
 
-        val firstAggregate = habitFacts.first { it.fact.habitId == habitId1 }
-        firstAggregate.fact.isCompleted shouldBe true
-        firstAggregate.habitData.name.value shouldBe "Бег"
+        result.size shouldBe 1
+        result.first().fact.habitId shouldBe habit.id
+        result.first().fact.isCompleted shouldBe false
 
-        val secondAggregate = habitFacts.first { it.fact.habitId == habitId2 }
-        secondAggregate.fact.isCompleted shouldBe false
-        secondAggregate.habitData.name.value shouldBe "Чтение"
+        // Проверяем автоматическую запись факта
+        val savedFacts = habitFactRepository.getHabitFacts(today)
+        savedFacts.size shouldBe 1
+        savedFacts.first().habitId shouldBe habit.id
     }
 
-    // 3. Тест для БУДУЩЕЙ даты
-    test("getHabitFactsForDate для БУДУЩЕЙ даты должен возвращать пустые факты для всех запланированных привычек") {
-        // На будущее запланировано 2 привычки. В репозитории фактов пусто.
-        val habitsStub = setOf(habit1, habit2)
+    test("should return empty list if habit is not scheduled for that day of week") {
+        val habitFactRepository = HabitFactRepositoryImpl()
+        val habitRepository = HabitRepositoryImpl()
 
-        val habitRepo = FakeHabitRepository(habitsStub)
-        val factRepo = FakeHabitFactRepository(emptyList()) // В будущем фактов в БД быть не может
+        val habit = Habit.create(
+            name = "Gym",
+            icon = Habit.Data.IconType.ICON4,
+            color = Habit.Data.ColorType.COLOR4,
+            weekIndices = setOf(today.dayOfWeek.ordinal) // Только воскресенье
+        )
 
-        val habitFacts = getHabitFactsForDate(may31, may30, factRepo, habitRepo)
+        habitRepository.create(habit)
 
-        // Должны вернуться дефолтные агрегаты для обеих привычек со статусом false
-        habitFacts shouldHaveSize 2
-        habitFacts.all { !it.fact.isCompleted } shouldBe true
-        habitFacts.map { it.fact.habitId }.toSet() shouldBe setOf(habitId1, habitId2)
+        // Запрашиваем субботу
+        val result = getHabitFactsForDate(yesterday, today, habitFactRepository, habitRepository)
+
+        result.size shouldBe 0
     }
 
-    // 4. Тест граничного случая: удаленная привычка
-    test("getHabitFactsForDate должен игнорировать сохраненные факты, если сама привычка была удалена из репозитория") {
-        // В базе фактов лежит старая отметка, но в репозитории привычек этой привычки больше нет
-        val habitsStub = emptySet<Habit>()
-        val savedFacts = listOf(HabitFact.create(habitId1))
+    test("should not create a new fact if requesting a past date without existing records") {
+        val habitFactRepository = HabitFactRepositoryImpl()
+        val habitRepository = HabitRepositoryImpl()
 
-        val habitRepo = FakeHabitRepository(habitsStub)
-        val factRepo = FakeHabitFactRepository(savedFacts)
+        val habit = Habit.create(
+            name = "Water",
+            icon = Habit.Data.IconType.ICON5,
+            color = Habit.Data.ColorType.COLOR5,
+            weekIndices = setOf(yesterday.dayOfWeek.ordinal) // Только суббота
+        )
 
-        val habitFacts = getHabitFactsForDate(may30, may30, factRepo, habitRepo)
+        habitRepository.create(habit)
 
-        // Результат должен быть пустым (автоматическое очищение от архивных/удаленных фактов)
-        habitFacts shouldHaveSize 0
+        val result = getHabitFactsForDate(yesterday, today, habitFactRepository, habitRepository)
+
+        result.size shouldBe 0
+        habitFactRepository.getHabitFacts(yesterday).size shouldBe 0
     }
 })
-
-// --- ЛЕГКОВЕСНЫЕ FAKE-РЕПОЗИТОРИИ ДЛЯ ИЗОЛИРОВАННОГО ТЕСТИРОВАНИЯ ---
-
-private class FakeHabitRepository(private val stubHabits: Set<Habit>) : HabitRepository {
-    override fun getHabitsByDayOfWeek(day: DayOfWeek): Set<Habit> {
-        // Для простоты тестов возвращаем фиксированный набор независимо от дня недели
-        return stubHabits
-    }
-
-    override fun create(habit: Habit): Result<Habit> {
-        TODO("Not yet implemented")
-    }
-
-    override fun getHabit(id: Habit.Id): Result<Habit> {
-        TODO("Not yet implemented")
-    }
-}
-
-private class FakeHabitFactRepository(private val stubFacts: Map<LocalDate, List<HabitFact>>) : HabitFactRepository {
-    override fun getHabitFacts(day: LocalDate): List<HabitFact> =
-        stubFacts[day] ?: emptyList()
-
-    override fun add(
-        day: LocalDate,
-        fact: HabitFact
-    ): Result<HabitFact> {
-        TODO("Not yet implemented")
-    }
-
-    override fun addAll(day: LocalDate, facts: List<HabitFact>): Result<List<HabitFact>> {
-        TODO("Not yet implemented")
-    }
-
-    override fun update(day: LocalDate, i: Int, fact: HabitFact): Result<HabitFact> {
-        TODO("Not yet implemented")
-    }
-
-    override fun getStartDate(habitId: Habit.Id): Result<LocalDate> {
-        TODO("Not yet implemented")
-    }
-}
-

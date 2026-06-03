@@ -80,7 +80,7 @@ class DI {
         // Собираем все дни периода в один плоский список
         val allDaysInPeriod = mutableListOf<LocalDate>()
         var currentIterationDate = startDate
-        while (currentIterationDate < today) {
+        while (currentIterationDate <= today) {
             allDaysInPeriod.add(currentIterationDate)
             currentIterationDate = currentIterationDate.plus(1, DateTimeUnit.DAY)
         }

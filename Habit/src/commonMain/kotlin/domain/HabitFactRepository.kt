@@ -14,6 +14,8 @@ interface HabitFactRepository {
     fun update(day: LocalDate, i: Int, fact: HabitFact): Result<HabitFact>
 
     fun getStartDate(habitId: Habit.Id): Result<LocalDate>
+
+    fun getCompletedDatesByHabitId(habitId: Habit.Id): Set<LocalDate>
     /*
     fun create(day: LocalDate, habit: Habit): Result<HabitFact>
 

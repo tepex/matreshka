@@ -4,8 +4,13 @@ import com.habitloop.app.habit.domain.model.Habit
 import com.habitloop.app.habit.domain.model.HabitFact
 import com.habitloop.app.habit.domain.model.HabitFactAggregate
 import com.habitloop.app.habit.domain.model.HabitStatistics
+import com.habitloop.app.habit.domain.model.HeatmapPeriod
+import com.habitloop.app.habit.domain.model.HeatmapState
+import com.habitloop.app.habit.ui.model.HeatmapRow
+import com.habitloop.app.habit.ui.model.HeatmapUiState
 import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.LocalDate
+import kotlinx.datetime.isoDayNumber
 import kotlinx.datetime.minus
 import kotlinx.datetime.plus
 
@@ -148,4 +153,30 @@ fun getHabitStatistics(
         bestStreak,
         if (totalFactsIn30Days > 0) ((completedFactsIn30Days.toDouble() / totalFactsIn30Days) * 100).toInt() else 0
     ).also { println("[stat] $it") }
+}
+
+fun getHeatmapStatistics(
+    habit: Habit,
+    habitFactRepository: HabitFactRepository,
+    today: LocalDate,
+    period: HeatmapPeriod
+): HeatmapUiState {
+    // понедельник текущей календарной недели
+    // самый первый понедельник начала сетки на основе period.count (количество недель)
+    val startMonday = today.minus(today.dayOfWeek.isoDayNumber - 1, DateTimeUnit.DAY)
+        .minus((period.rowsCount - 1) * 7, DateTimeUnit.DAY)
+    val completedDates = habitFactRepository.getCompletedDatesByHabitId(habit.id)
+
+    // список всех дат для отображения сетки
+    return List(period.rowsCount * 7) { i -> startMonday.plus(i, DateTimeUnit.DAY) }
+        // Маппим даты в HeatmapState, используя habit.data.weekly.value (BooleanArray)
+        .map { date ->
+            // Преобразуем isoDayNumber (1..7) в индекс массива (0..6)
+            val isScheduled = habit.data.weekly.value[date.dayOfWeek.isoDayNumber - 1]
+            when {
+                !isScheduled || (date > today) -> HeatmapState.EMPTY
+                completedDates.contains(date) -> HeatmapState.COMPLETED
+                else -> HeatmapState.NOT_COMPLETED
+            }
+        }.chunked(7).map { HeatmapRow(it) }.let(::HeatmapUiState)
 }

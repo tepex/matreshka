@@ -56,6 +56,9 @@ class HabitFactRepositoryImpl : HabitFactRepository {
             ?: throw NoSuchElementException("habit.id: $habitId not found")
     }
 
+    override fun getCompletedDatesByHabitId(habitId: Habit.Id): Set<LocalDate> =
+        decode().filter { (_, facts) -> facts.any { it.habitId.value == habitId.value && it.isCompleted } }.keys
+
     private fun decode(): Map<LocalDate, List<HabitFact>> =
         storage.takeIf { it.isNotBlank() }?.let { json.decodeFromString<Map<LocalDate, List<HabitFact>>>(storage) }
             ?: emptyMap()

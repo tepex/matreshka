@@ -48,13 +48,13 @@ class HabitFactRepositoryImpl : HabitFactRepository {
                 storage = json.encodeToString(map)
                 println("set completed for day[$i]: $day, $storage")
                 Result.success(fact)
-            } ?: Result.failure(RuntimeException("HabitFact $i not found for date: $day"))
+            } ?: Result.failure(NoSuchElementException("HabitFact $i not found for date: $day"))
         }
 
-        /*
-        getHabitFacts(day).toMutableList()[i]
-        println("set completed: $isCompleted for $day[$i]")
-        return Result.success(HabitFact.create(Habit.Id(-1)))*/
+    override fun getStartDate(habitId: Habit.Id): Result<LocalDate> = runCatching {
+        decode().filter { (_, facts) -> facts.any { it.habitId.value == habitId.value } }.keys.minOrNull()
+            ?: throw NoSuchElementException("habit.id: $habitId not found")
+    }
 
     private fun decode(): Map<LocalDate, List<HabitFact>> =
         storage.takeIf { it.isNotBlank() }?.let { json.decodeFromString<Map<LocalDate, List<HabitFact>>>(storage) }

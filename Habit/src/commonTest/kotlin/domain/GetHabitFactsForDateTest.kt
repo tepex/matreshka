@@ -123,10 +123,9 @@ private class FakeHabitRepository(private val stubHabits: Set<Habit>) : HabitRep
     }
 }
 
-private class FakeHabitFactRepository(private val stubFacts: List<HabitFact>) : HabitFactRepository {
-    override fun getHabitFacts(day: LocalDate): List<HabitFact> {
-        return stubFacts
-    }
+private class FakeHabitFactRepository(private val stubFacts: Map<LocalDate, List<HabitFact>>) : HabitFactRepository {
+    override fun getHabitFacts(day: LocalDate): List<HabitFact> =
+        stubFacts[day] ?: emptyList()
 
     override fun add(
         day: LocalDate,
@@ -140,6 +139,10 @@ private class FakeHabitFactRepository(private val stubFacts: List<HabitFact>) : 
     }
 
     override fun update(day: LocalDate, i: Int, fact: HabitFact): Result<HabitFact> {
+        TODO("Not yet implemented")
+    }
+
+    override fun getStartDate(habitId: Habit.Id): Result<LocalDate> {
         TODO("Not yet implemented")
     }
 }

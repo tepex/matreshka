@@ -91,10 +91,7 @@ fun getHabitStatistics(
     habitFactRepository: HabitFactRepository,
     today: LocalDate
 ): HabitStatistics {
-
-    val startDate = LocalDate(2026, 1, 1)
-    if (today < startDate) return HabitStatistics()
-
+    val startDate = habitFactRepository.getStartDate(habit.id).getOrElse { today }
     // Формируем список всех дней от startDate до вчерашнего дня включительно
     val yesterday = today.minus(1, DateTimeUnit.DAY)
     val activeDaysHistory = mutableListOf<LocalDate>()

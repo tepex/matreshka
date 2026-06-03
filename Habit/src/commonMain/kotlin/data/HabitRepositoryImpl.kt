@@ -88,7 +88,7 @@ class HabitRepositoryImpl(/*private val storage: HabitStorage*/) : HabitReposito
         storage.takeIf { it.isNotBlank() }?.let {
             json.decodeFromString<Set<Habit>>(it)
                 .firstOrNull() { it.id == id } ?.let { Result.success(it) }
-        } ?: Result.failure(RuntimeException("Habit id: $id not found"))
+        } ?: Result.failure(NoSuchElementException("Habit id: $id not found"))
 }
 
 val predefinedHabits = setOf(

@@ -1,6 +1,7 @@
 package com.habitloop.app.habit.ui
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -10,10 +11,14 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.AcUnit
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.ChevronLeft
+import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.SelfImprovement
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -21,12 +26,24 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.habitloop.app.habit.DI
+import com.habitloop.app.habit.domain.HabitFactRepository
+import com.habitloop.app.habit.domain.HabitRepository
+import com.habitloop.app.habit.domain.getHabitStatistics
 import com.habitloop.app.habit.domain.model.Habit
+import com.habitloop.app.habit.domain.model.HabitStatistics
+import com.habitloop.app.habit.ui.model.getDaysWord
+import kotlinx.datetime.Clock
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HabitDetailsScreen(
     habitId: Habit.Id = Habit.Id.INVALID,
+    habitRepository: HabitRepository,
+    habitFactRepository: HabitFactRepository,
     onBackClick: () -> Unit = {},
     onEditClick: () -> Unit = {}
 ) {
@@ -39,42 +56,51 @@ fun HabitDetailsScreen(
     val brandBlue = Color(0xFF3B638A) // Цвет кнопок и процентов
     val grayField = Color(0xFFF4F4F6)
 
+    val habit = remember { habitRepository.getHabit(habitId).getOrNull() }
+    val today = remember { Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date }
+    val stats = habit
+        ?.let { remember(it.id) { getHabitStatistics(it, habitFactRepository, today) } }
+        ?: HabitStatistics()
+
+    println("[HabitDetails] habit: $habit")
+    println("[HabitDetails] stats: $stats")
+
     Scaffold(
-        containerColor = bgLightBlue,
+        containerColor = backgroundWhite,
         topBar = {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(56.dp)
-                    .padding(horizontal = 12.dp),
-                contentAlignment = Alignment.CenterStart
-            ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.clickable { onBackClick() }
-                        .padding(8.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = "Назад",
-                        tint = brandBlue,
-                        modifier = Modifier.size(24.dp)
-                    )
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Text(text = "Назад", color = brandBlue, fontSize = 16.sp)
-                }
-            }
+            TopAppBar(
+                title = { Text(text = "Назад") },
+                navigationIcon = {
+                    Box(
+                        modifier = Modifier
+                            .padding(start = 16.dp)
+                            .size(40.dp)
+                            .background(Color.White, shape = CircleShape)
+                            .clickable { onBackClick() },
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Назад",
+                            tint = textDark,
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
+            )
         }
     ) { paddingValues ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .padding(horizontal = 20.dp)
-                .verticalScroll(rememberScrollState()),
-            horizontalAlignment = Alignment.CenterHorizontally
+                .padding(horizontal = 24.dp)
+                .background(bgLightBlue)
         ) {
-            // 1. Шапка привычки: Иконка, название и кнопка редактирования
+            Spacer(modifier = Modifier.height(8.dp))
+
+            // 1. Верхний блок: Информация о привычке
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
@@ -83,61 +109,81 @@ fun HabitDetailsScreen(
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Box(
                         modifier = Modifier
-                            .size(54.dp)
+                            .size(52.dp)
                             .background(brandRed, shape = CircleShape),
                         contentAlignment = Alignment.Center
                     ) {
-                        Icon(
-                            imageVector = Icons.Default.SelfImprovement,
-                            contentDescription = null,
-                            tint = Color.White,
-                            modifier = Modifier.size(28.dp)
-                        )
+                        Text(text = "🧘", fontSize = 24.sp)
                     }
-                    Spacer(modifier = Modifier.width(14.dp))
+
+                    Spacer(modifier = Modifier.width(16.dp))
+
                     Column {
-                        Text(text = "Медитация", fontSize = 20.sp, fontWeight = FontWeight.Bold, color = textDark)
-                        Text(text = "🔥 31 день подряд - рекорд!", fontSize = 13.sp, color = textGray)
+                        Text(
+                            text = habit?.data?.name?.value ?: "Not found",
+                            fontSize = 20.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = textDark
+                        )
+                        /*
+                        Spacer(modifier = Modifier.height(2.dp))
+
+                        // Строка рекорда
+                        Text(
+                            text = "${stats.currentStreak} ${stats.currentStreak.getDaysWord()} подряд - рекорд!",
+                            fontSize = 13.sp,
+                            color = textGray
+                        )*/
                     }
                 }
 
-                IconButton(
-                    onClick = onEditClick,
+                Box(
                     modifier = Modifier
                         .size(36.dp)
-                        .background(Color.White, CircleShape)
+                        .background(Color.White, shape = CircleShape)
+                        .border(1.dp, textGray, shape = CircleShape)
+                        .clickable { onEditClick() },
+                    contentAlignment = Alignment.Center
                 ) {
-                    Icon(Icons.Default.Edit, contentDescription = "Редактировать", tint = textGray, modifier = Modifier.size(18.dp))
+                    Icon(
+                        imageVector = Icons.Default.Edit,
+                        contentDescription = "Редактировать",
+                        tint = textGray,
+                        modifier = Modifier.size(16.dp)
+                    )
                 }
             }
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // 2. Блок Статистики (Текущая, Лучшая, За 30 дней)
+            // 2. Блок числовых показателей статистики (Текущая, Лучшая, За 30 дней)
             Card(
                 modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(20.dp),
-                colors = CardDefaults.cardColors(containerColor = backgroundWhite)
+                shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.cardColors(containerColor = Color.White),
+                elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
             ) {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(vertical = 16.dp, horizontal = 12.dp),
-                    horizontalArrangement = Arrangement.SpaceAround
+                        .padding(vertical = 16.dp),
+                    horizontalArrangement = Arrangement.SpaceEvenly
                 ) {
-                    StatItem(value = "31", label = "Текущая", valueColor = brandBlue)
-                    StatItem(value = "31", label = "Лучшая", valueColor = brandRed)
-                    StatItem(value = "87%", label = "За 30 дней", valueColor = Color(0xFFFFB300))
+                    // Числа выводятся без эмодзи согласно требованиям
+                    StatItem(value = "${stats.currentStreak}", label = "Текущая", valueColor = brandBlue)
+                    StatItem(value = "${stats.bestStreak}", label = "Лучшая", valueColor = brandRed)
+                    StatItem(value = "${stats.successRate30Days}%", label = "За 30 дней", valueColor = Color(0xFFFFB300))
                 }
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(24.dp))
 
-            // 3. Блок "Тепловая карта"
+            // 3. Симуляция: Тепловая карта (Heatmap) - оставлена без изменений
             Card(
                 modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(20.dp),
-                colors = CardDefaults.cardColors(containerColor = backgroundWhite)
+                shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.cardColors(containerColor = Color.White),
+                elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
                     Row(
@@ -146,50 +192,41 @@ fun HabitDetailsScreen(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(text = "Тепловая карта", fontSize = 14.sp, fontWeight = FontWeight.Bold, color = textDark)
-                        Text(text = "7 дней ▾", fontSize = 12.sp, color = brandBlue, modifier = Modifier.clickable { })
-                    }
-
-                    Spacer(modifier = Modifier.height(16.dp))
-
-                    // Сетка дней недели (Пн-Вс)
-                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                        val weekdays = listOf("Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс")
-                        weekdays.forEach { day ->
-                            Text(text = day, fontSize = 11.sp, color = textGray, modifier = Modifier.width(24.dp), textAlign = TextAlign.Center)
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text(text = "7 дней", fontSize = 12.sp, color = textGray)
+                            Icon(imageVector = Icons.Default.ChevronRight, contentDescription = null, tint = textGray, modifier = Modifier.size(16.dp))
                         }
                     }
-
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                        val days = listOf("Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс")
+                        days.forEach { day ->
+                            Text(text = day, fontSize = 11.sp, color = textGray, modifier = Modifier.weight(1f), textAlign = TextAlign.Center)
+                        }
+                    }
                     Spacer(modifier = Modifier.height(8.dp))
-
-                    // Симуляция заполненных кружков тепловой карты (строки по дням)
-                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        repeat(3) { rowIndex ->
-                            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                                repeat(7) { colIndex ->
-                                    // Рандомно закрашиваем некоторые дни как выполненные в Figma
-                                    val isDone = (rowIndex + colIndex) % 2 == 0
-                                    Box(
-                                        modifier = Modifier
-                                            .size(24.dp)
-                                            .background(
-                                                color = if (isDone) brandBlue else grayField,
-                                                shape = CircleShape
-                                            )
-                                    )
-                                }
-                            }
+                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                        for (i in 0..6) {
+                            Box(
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .padding(horizontal = 4.dp)
+                                    .aspectRatio(1f)
+                                    .background(if (i % 2 == 0) brandBlue else Color(0xFFE5E5EA), shape = CircleShape)
+                            )
                         }
                     }
                 }
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(24.dp))
 
-            // 4. Блок "Выполнение по дням недели"
+            // 4. Симуляция: Выполнение по дням недели - оставлена без изменений
             Card(
                 modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(20.dp),
-                colors = CardDefaults.cardColors(containerColor = backgroundWhite)
+                shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.cardColors(containerColor = Color.White),
+                elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
                     Row(
@@ -197,72 +234,92 @@ fun HabitDetailsScreen(
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
+
                         Text(text = "Выполнение по дням недели", fontSize = 14.sp, fontWeight = FontWeight.Bold, color = textDark)
-                        Text(text = "📅 23-29 марта", fontSize = 12.sp, color = textGray)
+
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(
+                                imageVector = Icons.Default.ChevronLeft,
+                                contentDescription = null,
+                                tint = textGray,
+                                modifier = Modifier.size(16.dp)
+                            )
+                            Text(text = "23-29 марта", fontSize = 12.sp, color = textGray, modifier = Modifier.padding(horizontal = 4.dp))
+                            Icon(
+                                imageVector = Icons.Default.ChevronRight,
+                                contentDescription = null,
+                                tint = textGray,
+                                modifier = Modifier.size(16.dp))
+                        }
                     }
+                    Spacer(modifier = Modifier.height(8.dp))
 
-                    Spacer(modifier = Modifier.height(12.dp))
-
-                    Text(text = "25%", fontSize = 24.sp, fontWeight = FontWeight.Black, color = brandBlue)
-
+                    Text(text = "25%", fontSize = 24.sp, fontWeight = FontWeight.Bold, color = brandBlue)
                     Spacer(modifier = Modifier.height(16.dp))
 
-                    // График-гистограмма (Вертикальные столбики)
                     Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(60.dp),
+                        modifier = Modifier.fillMaxWidth().height(100.dp),
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.Bottom
                     ) {
-                        val barHeights = listOf(20.dp, 45.dp, 10.dp, 55.dp, 30.dp, 40.dp, 15.dp)
-                        val weekdays = listOf("Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс")
-
-                        barHeights.forEachIndexed { index, height ->
-                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                Box(
-                                    modifier = Modifier
-                                        .size(width = 8.dp, height = height)
-                                        .background(brandBlue, RoundedCornerShape(4.dp))
-                                )
-                                Spacer(modifier = Modifier.height(4.dp))
-                                Text(text = weekdays[index], fontSize = 10.sp, color = textGray)
-                            }
+                        val progress = listOf(0.2f, 0.5f, 0.1f, 0.8f, 0.4f, 0.9f, 0.3f)
+                        progress.forEach { value ->
+                            Box(
+                                modifier = Modifier.weight(1f)
+                                    .padding(horizontal = 6.dp)
+                                    .fillMaxHeight(value)
+                                    .background(brandBlue, shape = RoundedCornerShape(topStart = 4.dp, topEnd = 4.dp))
+                            )
                         }
                     }
                 }
-            }
-            Spacer(modifier = Modifier.height(16.dp))
 
-            // 5. Блок "Заморозка"
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(20.dp),
-                colors = CardDefaults.cardColors(containerColor = backgroundWhite)
-            ) {
+                Spacer(modifier = Modifier.height(8.dp))
+
                 Row(
-                    modifier = Modifier.padding(16.dp),
-                    verticalAlignment = Alignment.CenterVertically
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    Icon(Icons.Default.AcUnit, contentDescription = null, tint = brandBlue, modifier = Modifier.size(24.dp))
-                    Spacer(modifier = Modifier.width(12.dp))
-                    Text(text = "Заморозок: 2 из 3 доступно", fontSize = 14.sp, fontWeight = FontWeight.Medium, color = textDark)
+                    val days = listOf("Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс")
+                    days.forEach { day ->
+                        Text(
+                            text = day,
+                            fontSize = 11.sp,
+                            color = textGray,
+                            modifier = Modifier.weight(1f),
+                            textAlign = TextAlign.Center
+                        )
+                    }
                 }
             }
+
             Spacer(modifier = Modifier.height(24.dp))
 
-            // 6. Кнопка "Архивировать привычку"
-            Button(
-                onClick = { /* Логика архивации */ },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(54.dp),
-                shape = RoundedCornerShape(16.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = grayField)
+            // 5. Симуляция: Заморозки - оставлена без изменений
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(text = "Архивировать привычку", color = brandRed, fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(text = "❄️", fontSize = 20.sp)
+                    Spacer(modifier = Modifier.width(8.dp))
+
+                    Text(text = "Заморозки: 2 из 3 доступно", fontSize = 14.sp, color = textDark)
+                }
             }
+
             Spacer(modifier = Modifier.height(24.dp))
+
+            // 6. Симуляция: Кнопка архивации - оставлена без изменений
+            Button(
+                onClick = { },
+                modifier = Modifier.fillMaxWidth(),
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFE5E5EA)),
+                shape = RoundedCornerShape(12.dp)
+            ) {
+                Text(text = "Архивировать привычку", color = brandRed, fontWeight = FontWeight.Bold)
+            }
         }
     }
 }
@@ -280,5 +337,9 @@ fun StatItem(value: String, label: String, valueColor: Color) {
 @Preview
 @Composable
 fun HabitDetailsScreenPreview() {
-    HabitDetailsScreen()
+    val di = DI()
+    HabitDetailsScreen(
+        habitRepository = di.habitRepository,
+        habitFactRepository = di.habitFactRepository
+    )
 }

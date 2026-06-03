@@ -57,10 +57,9 @@ fun DayOfWeek.toRu(): String =
 /**
  * Функция для правильного склонения слова "день" в зависимости от числа серий подряд
  */
-fun getDaysWord(streak: Int): String =
-    if ((streak % 100) in 11..19) "дней" else when (streak % 10) {
+fun Int.getDaysWord(): String =
+    if ((this % 100) in 11..19) "дней" else when (this % 10) {
         1 -> "день"
         2, 3, 4 -> "дня"
         else -> "дней"
     }
-

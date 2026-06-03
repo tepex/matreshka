@@ -32,7 +32,7 @@ class GetHabitStatisticsTest : FunSpec({
             ).also { habit ->
                 habitRepository.create(habit)
 
-                getHabitStatistics(habit.id, habitRepository, habitFactRepository, today).run {
+                getHabitStatistics(habit, habitFactRepository, today).run {
                     currentStreak shouldBe 0
                     bestStreak shouldBe 0
                     successRate30Days shouldBe 0
@@ -62,7 +62,7 @@ class GetHabitStatisticsTest : FunSpec({
                     listOf(HabitFact.create(habit.id).setCompletion(true))
                 )
 
-                getHabitStatistics(habit.id, habitRepository, habitFactRepository, today).run {
+                getHabitStatistics(habit, habitFactRepository, today).run {
                     currentStreak shouldBe 3
                     bestStreak shouldBe 3
                 }
@@ -108,7 +108,7 @@ class GetHabitStatisticsTest : FunSpec({
                     listOf(HabitFact.create(habit.id).setCompletion(true))
                 )
 
-                getHabitStatistics(habit.id, habitRepository, habitFactRepository, today).run {
+                getHabitStatistics(habit, habitFactRepository, today).run {
                     bestStreak shouldBe 4
                     currentStreak shouldBe 0
                 }
@@ -139,7 +139,7 @@ class GetHabitStatisticsTest : FunSpec({
                 }
 
                 // 6 completed out of 10 existing facts = 60%
-                getHabitStatistics(habit.id, habitRepository, habitFactRepository, today).successRate30Days shouldBe 60
+                getHabitStatistics(habit, habitFactRepository, today).successRate30Days shouldBe 60
             }
         }
     }

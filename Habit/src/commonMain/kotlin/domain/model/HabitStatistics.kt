@@ -1,7 +1,7 @@
 package com.habitloop.app.habit.domain.model
 
 data class HabitStatistics(
-    val currentStreak: Int,
-    val bestStreak: Int,
-    val successRate30Days: Int
+    val currentStreak: Int = 0,
+    val bestStreak: Int = 0,
+    val successRate30Days: Int = 0
 )

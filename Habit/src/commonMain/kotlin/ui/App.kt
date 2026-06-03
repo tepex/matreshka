@@ -92,6 +92,8 @@ fun AppContent(
                 if (selectedHabitId != Habit.Id.INVALID)
                     HabitDetailsScreen(
                         habitId = selectedHabitId,
+                        di.habitRepository,
+                        di.habitFactRepository,
                         onBackClick = { onScreenChange(AppScreen.HABIT_DAY) }
                     )
                 else onScreenChange(AppScreen.HABIT_DAY)
